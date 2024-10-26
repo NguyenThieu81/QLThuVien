@@ -1,0 +1,130 @@
+<html layout:decorate="~{layout}" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>
+        Sign Up
+    </title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;display=swap" rel="stylesheet"/>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
+    <style>
+        body {
+                 font-family: 'Roboto', sans-serif;
+                 background: linear-gradient(to right, #e0f7fa, #ffffff);
+                 height: 100vh;
+                 display: flex;
+                 justify-content: center;
+                 align-items: center;
+             }
+             .signup-container {
+                 display: flex;
+                 background-color: #fff;
+                 border-radius: 10px;
+                 box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+                 overflow: hidden;
+                 width: 850px;
+                 height: 500px;
+             }
+             .signup-image {
+                 flex: 1;
+             }
+             .signup-image img {
+                 width: 100%;
+                 height: 100%;
+                 object-fit: cover;
+             }
+             .signup-form {
+                 flex: 2;
+                 padding: 40px;
+                 display: flex;
+                 flex-direction: column;
+                 justify-content: center;
+             }
+             .signup-form h2 {
+                 margin-bottom: 20px;
+                 font-weight: bold;
+                 color: #007bff;
+             }
+             .signup-form .form-group {
+                 margin-bottom: 15px;
+             }
+             .signup-form .form-control {
+                 border-radius: 30px;
+                 padding: 10px 20px;
+             }
+             .signup-form .btn-signup {
+                 background-color: #007bff;
+                 color: white;
+                 border-radius: 30px;
+                 padding: 10px 20px;
+                 border: none;
+             }
+             .signup-form .btn-signup:hover {
+                 background-color: #0056b3;
+             }
+             .signup-form .text-muted {
+                 font-size: 12px;
+                 margin-top: 10px;
+             }
+             .signup-form a {
+                 color: #007bff;
+                 text-decoration: none;
+                 font-size: 14px;
+             }
+             .social-signup {
+                 display: flex;
+                 justify-content: space-between;
+                 margin-top: 15px;
+             }
+             .social-signup button {
+                 flex: 1;
+                 margin: 0 5px;
+                 padding: 10px;
+                 border-radius: 30px;
+                 border: 1px solid #ddd;
+                 background-color: white;
+             }
+             .social-signup button:hover {
+                 background-color: #f0f0f0;
+             }
+    </style>
+</head>
+<body>
+<div class="signup-container">
+    <div class="signup-image">
+        <img src="/static/image/signup.png" height="500"  width="425"/>
+    </div>
+    <div class="signup-form">
+        <h2>
+            Sign up
+        </h2>
+        <form method="post" th:action="@{/register}">
+            <div class="form-group">
+                <input class="form-control" name="email" placeholder="Your Email" required="" type="email"/>
+            </div>
+            <div class="form-group">
+                <input class="form-control" name="username" placeholder="User Name" required="" type="text"/>
+            </div>
+            <div class="form-group">
+                <input class="form-control" name="password" placeholder="Password" required="" type="password"/>
+            </div>
+            <div class="form-group">
+                <input class="form-control" name="confirmPassword" placeholder="Confirm Password" required="" type="password"/>
+            </div>
+            <div class="form-group">
+                <button class="btn btn-signup btn-block" type="submit">
+                    Sign Up
+                </button>
+            </div>
+        </form>
+        <p class="text-muted text-center mt-3">
+            Already have an account?
+            <a href="/login">
+                Sign In
+            </a>
+        </p>
+    </div>
+</div>
+</body>
+</html>

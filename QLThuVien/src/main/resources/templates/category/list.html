@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Danh sách thể loại</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    /* Add some basic styling to make the table look better */
+    table {
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <h1 class="mt-4">Danh sách thể loại</h1>
+  <a href="/admin" class="btn btn-secondary mb-3">Quay lại </a>
+  <a href="/admin/category/add" class="btn btn-primary">Thêm thể loại</a>
+  <table class="table table-bordered mt-3">
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Tên thể loại</th>
+      <th>Hành động</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="category : ${categories}">
+      <td th:text="${category.id}"></td>
+      <td th:text="${category.name}"></td>
+      <td>
+        <a th:href="@{/admin/category/edit/{id}(id=${category.id})}" class="btn btn-warning">Sửa</a>
+        <a th:href="@{/admin/category/delete/{id}(id=${category.id})}" class="btn btn-danger" onclick="return confirm('Bạn có chắc chắn muốn xóa không?');">Xóa</a>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

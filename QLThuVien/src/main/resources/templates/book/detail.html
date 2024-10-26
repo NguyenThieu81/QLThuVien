@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Mô Tả Sách</title>
+    <th:block th:replace="~{layout :: link-css}"></th:block>
+</head>
+
+<body>
+<th:block th:replace="~{layout::header}"></th:block>
+
+<!-- Content -->
+<div class="container mt-5">
+    <h1 th:text="${book.title}">Tên Sách</h1>
+    <div class="row">
+        <!-- Hình ảnh sách -->
+        <div class="col-md-4">
+            <img th:src="@{${book.imagePath}}" class="img-fluid" alt="Book Image">
+        </div>
+
+        <div class="col-md-8">
+            <h4>Mô Tả:</h4>
+            <p th:text="${book.description}">Mô tả sách</p>
+            <h5>Tác giả: <span th:text="${book.author}">Tác giả</span></h5>
+            <h5>Thể loại: <span th:text="${book.category.name}">Thể loại</span></h5>
+            <h5>Năm Xuất Bản: <span th:text="${book.yearPublished}">Năm Xuất Bản</span></h5>
+            <a href="#" class="btn btn-primary">Mượn Sách</a>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="~{layout::footer}"></th:block>
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,401 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        /* Custom dropdown styles */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: white;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .active {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 50;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.4);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 500px;
+            border-radius: 8px;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+         .img-thumbnail {
+        width: 150px;
+        height: auto;
+    }
+    </style>
+</head>
+<body class="bg-gray-100 font-sans">
+<div class="flex h-screen">
+    <!-- Sidebar -->
+    <div class="w-64 bg-white shadow-md">
+        <div class="p-6">
+            <a class="navbar-brand" th:href="@{/}">
+                <img src="/static/image/logo.png" alt="Logo" style="max-height: 80px;">
+            </a>
+        </div>
+        <nav class="mt-4">
+            <p class="text-gray-600 uppercase text-xs font-semibold px-6">Main Menu</p>
+            <a href="#" class="flex items-center px-6 py-3 mt-4 text-gray-600 hover:bg-gray-200 rounded-md" onclick="activateMenuItem(this)">
+                <i class="fas fa-home"></i>
+                <span class="mx-3">Home</span>
+            </a>
+            <a href="#" class="flex items-center px-6 py-3 mt-4 text-gray-600 hover:bg-gray-200 rounded-md" onclick="activateMenuItem(this)">
+                <i class="fas fa-search"></i>
+                <span class="mx-3">Search</span>
+            </a>
+            <a href="#" class="flex items-center px-6 py-3 mt-4 text-gray-600 hover:bg-gray-200 rounded-md" onclick="activateMenuItem(this); showBookManagement()">
+                <i class="fas fa-book"></i>
+                <span class="mx-3">Books</span>
+            </a>
+        </nav>
+        <div class="mt-10">
+            <p class="text-gray-600 uppercase text-xs font-semibold px-6">Support</p>
+            <a href="#" class="flex items-center px-6 py-3 mt-4 text-gray-600 hover:bg-gray-200 rounded-md" onclick="activateMenuItem(this)">
+                <i class="fas fa-cog"></i>
+                <span class="mx-3">Setting</span>
+            </a>
+        </div>
+    </div>
+    <!-- Main Content -->
+    <div class="flex-1 flex flex-col">
+        <header class="flex items-center justify-between p-6 bg-white shadow-md">
+            <div class="relative w-1/3">
+                <input type="text" class="w-full px-4 py-2 text-gray-700 bg-gray-200 rounded-md focus:outline-none" placeholder="Search">
+                <div class="absolute top-0 right-0 mt-3 mr-4 text-gray-600">
+                    <i class="fas fa-search"></i>
+                </div>
+            </div>
+            <div class="flex items-center">
+                <span id="datetime" class="text-gray-600"></span>
+                <button class="ml-6 text-gray-600">
+                    <i class="fas fa-bell"></i>
+                </button>
+                <div class="ml-6 relative">
+                    <div class="flex items-center cursor-pointer" onclick="toggleDropdown()">
+                        <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-gray-800 font-semibold">NGUYEN VAN A</p>
+                            <p class="text-gray-600 text-sm">Admin</p>
+                        </div>
+                    </div>
+                    <div id="dropdown-content" class="dropdown-content">
+                        <a href="#">Sign Out</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <main class="flex-1 p-6 bg-gray-100">
+            <!-- Book Management Section -->
+            <div class="flex justify-start mb-4">
+                <button id="bookButton" class="px-4 py-2 bg-white text-black rounded-md border border-gray-300 hover:bg-gray-200 active" onclick="showBookManagement()">Book Management</button>
+                <button id="categoryButton" class="px-4 py-2 bg-white text-black rounded-md border border-gray-300 hover:bg-gray-200 ml-2" onclick="showCategoryManagement()">Category Management</button>
+            </div>
+            <!-- Book Management Section -->
+            <div id="book-management" class="bg-white p-6 rounded-lg shadow-md">
+                <h2 class="text-2xl font-semibold mb-6">Book Management</h2>
+                <div class="flex justify-between mb-4">
+                    <input type="text" class="w-1/3 px-4 py-2 text-gray-700 bg-gray-200 rounded-md focus:outline-none" placeholder="Search books...">
+                    <button class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600" onclick="openModal()">Add New Book</button>
+                </div>
+                <table class="min-w-full bg-white">
+                    <thead>
+                    <tr>
+                        <th class="py-2 px-4 border-b">ID</th>
+                        <th class="py-2 px-4 border-b">Image</th>
+                        <th class="py-2 px-4 border-b">Title</th>
+                        <th class="py-2 px-4 border-b">Author</th>
+                        <th class="py-2 px-4 border-b">Category</th>
+                        <th class="py-2 px-4 border-b">Description</th>
+                        <th class="py-2 px-4 border-b">Status</th>
+                        <th class="py-2 px-4 border-b">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- Iterate over the books list -->
+                    <tr th:each="book : ${books}">
+                        <td th:text="${book.id}"></td>
+                        <td>
+                        <td><img th:if="${book.imagePath}" th:src="@{${book.imagePath}}"  class="img-thumbnail" style="max-height: 50px;"/>
+                        </td>
+                        <td th:text="${book.title}"></td>
+                        <td th:text="${book.author}"></td>
+                        <td th:text="${book.category.name}"></td>
+                        <td th:text="${book.description}"></td>
+                        <td th:text="${book.status}"></td>
+                        <td>
+                            <button class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-red-600" onclick="openEditModal(${book.id})">Edit</button>
+                            <button class="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600" onclick="deleteBook(${book.id})">Delete</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Category Management Section -->
+            <div id="category-management" class="bg-white p-6 rounded-lg shadow-md hidden">
+                <h2 class="text-2xl font-semibold mb-6">Category Management</h2>
+                <div class="flex justify-between mb-4">
+                    <input type="text" class="w-1/3 px-4 py-2 text-gray-700 bg-gray-200 rounded-md focus:outline-none" placeholder="Search categories...">
+                    <button class="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600" onclick="openCategoryModal()">Add New Category</button>
+                </div>
+                <table class="min-w-full bg-white">
+                    <thead>
+                    <tr>
+                        <th class="py-2 px-4 border-b">ID</th>
+                        <th class="py-2 px-4 border-b">Name</th>
+                        <th class="py-2 px-4 border-b">Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <!-- Iterate over the categories list -->
+                    <tr th:each="category : ${categories}">
+                        <td th:text="${category.id}"></td>
+                        <td th:text="${category.name}"></td>
+                        <td>
+                            <button class="text-red-500" onclick="deleteCategory(${category.id})">Delete</button>
+                            <button class="text-blue-500" onclick="openEditCategoryModal(${category.id})">Edit</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- The Modal -->
+<div id="myModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <h2 class="text-2xl font-semibold mb-6">Add New Book</h2>
+        <form id="addBookForm" enctype="multipart/form-data">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="title">Title</label>
+                <input type="text" id="title" name="title" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="author">Author</label>
+                <input type="text" id="author" name="author" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="category">Category</label>
+                <input type="text" id="category" name="category" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="description">Description</label>
+                <textarea id="description" name="description" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+            </div>
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="image">Image</label>
+                <input type="file" id="image" name="image" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" accept="image/*">
+            </div>
+            <div class="flex items-center justify-between">
+                <button type="button" onclick="addBook()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Add Book</button>
+            </div>
+        </form>
+    </div>
+</div>
+<!-- The Category Modal -->
+<div id="categoryModal" class="modal">
+    <div class="modal-content">
+        <span class="close" onclick="closeCategoryModal()">&times;</span>
+        <h2 class="text-2xl font-semibold mb-6">Add New Category</h2>
+        <form id="addCategoryForm">
+            <div class="mb-4">
+                <label class="block text-gray-700 text-sm font-bold mb-2" for="categoryName">Category Name</label>
+                <input type="text" id="categoryName" name="categoryName" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+            </div>
+            <div class="flex items-center justify-between">
+                <button type="button" onclick="addCategory()" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">Add Category</button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    function toggleDropdown() {
+        var dropdown = document.getElementById("dropdown-content");
+        if (dropdown.style.display === "block") {
+            dropdown.style.display = "none";
+        } else {
+            dropdown.style.display = "block";
+        }
+    }
+
+    // Close the dropdown if the user clicks outside of it
+    window.onclick = function(event) {
+        if (!event.target.matches('.cursor-pointer')) {
+            var dropdowns = document.getElementsByClassName("dropdown-content");
+            for (var i = 0; i < dropdowns.length; i++) {
+                var openDropdown = dropdowns[i];
+                if (openDropdown.style.display === "block") {
+                    openDropdown.style.display = "none";
+                }
+            }
+        }
+    }
+
+    function updateDateTime() {
+        var now = new Date();
+        var days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+        var day = days[now.getDay()];
+        var date = now.getDate();
+        var month = now.toLocaleString('default', { month: 'long' });
+        var year = now .getFullYear();
+        var hours = now.getHours();
+        var minutes = now.getMinutes();
+        minutes = minutes < 10 ? '0'+minutes : minutes;
+        var strTime = hours + ':' + minutes;
+        var dateTime = day + ', ' + date + ' ' + month + ', ' + year + ' - ' + strTime;
+        document.getElementById('datetime').innerHTML = dateTime;
+    }
+
+    setInterval(updateDateTime, 1000);
+    updateDateTime(); // initial call to set the date and time immediately
+
+    function showBookManagement() {
+        document.getElementById('book-management').classList.remove('hidden');
+        document.getElementById('category-management').classList.add('hidden');
+        document.getElementById('bookButton').classList.add('active');
+        document.getElementById('categoryButton').classList.remove('active');
+    }
+
+    function showCategoryManagement() {
+        document.getElementById('category-management').classList.remove('hidden');
+        document.getElementById('book-management').classList.add('hidden');
+        document.getElementById('categoryButton').classList.add('active');
+        document.getElementById('bookButton').classList.remove('active');
+    }
+
+    function activateMenuItem(element) {
+        var menuItems = document.querySelectorAll('nav a');
+        menuItems.forEach(function(item) {
+            item.classList.remove('active');
+        });
+        element.classList.add('active');
+    }
+
+    function openModal() {
+        document.getElementById('myModal').style.display = "block";
+    }
+
+    function closeModal() {
+        document.getElementById('myModal').style.display = "none";
+    }
+
+    function openCategoryModal() {
+        document.getElementById('categoryModal').style.display = "block";
+    }
+
+    function closeCategoryModal() {
+        document.getElementById('categoryModal').style.display = "none";
+    }
+
+  function addBook() {
+    const formData = new FormData(document.getElementById('addBookForm'));
+
+    fetch('/admin/books', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error ('Failed to add book');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Success:', data);
+        closeModal(); // Close the modal after success
+        // Optionally, refresh the book list or add the new book to the table
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+
+function addCategory() {
+    const formData = new FormData(document.getElementById('addCategoryForm'));
+
+    fetch('/admin/categories', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Failed to add category');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Success:', data);
+        closeCategoryModal(); // Close the modal after success
+        // Optionally, refresh the category list or add the new category to the table
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+    });
+}
+</script>
+</body>
+</html>
