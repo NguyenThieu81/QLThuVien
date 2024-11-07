@@ -19,21 +19,35 @@ public class Book {
     @Column(name = "title")
     private String title;
 
-    @NotBlank(message = "Tác giả không được để trống")
-    @Size(max = 100, message = "Tên tác giả phải ít hơn 100 ký tự")
-    @Column(name = "author")
-    private String author;
+    @ManyToOne
+    @JoinColumn(name = "author_id", nullable = false)
+    private Author author; // Change from String to Author object
 
     @NotBlank(message = "Mô tả không được để trống")
-    @Size(max = 100, message = "Mô tả phải ít hơn 100 ký tự")
+    @Size(max = 5000, message = "Mô tả phải ít hơn 5000 ký tự")
     @Column(name = "description")
     private String description;
+
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
 
-    @OneToMany(mappedBy = "book", cascade = CascadeType.ALL)
-    private Set<BorrowRecord> borrowRecords;
-    private String ImagePath;
+    private String imagePath; // Changed to camelCase
+
+
+    @Min(value = 0, message = "Số lượng phải lớn hơn hoặc bằng 0")
+    @Column(name = "quantity")
+    private Integer quantity;
+    public void borrow() {
+        if (this.quantity > 0) {
+            this.quantity--;
+        } else {
+            throw new IllegalStateException("Không còn sách để mượn.");
+        }
+    }
+
+    public void returnBook() {
+        this.quantity++;
+    }
 }

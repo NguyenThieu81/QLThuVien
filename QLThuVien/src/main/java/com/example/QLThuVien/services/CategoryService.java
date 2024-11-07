@@ -16,19 +16,22 @@ public class CategoryService {
         return categoryRepository.findAll();
     }
 
-    public Category getCategoryById(Long id) {
+    public Category getById(Long id) {
         return categoryRepository.findById(id).orElse(null);
     }
 
-    public void addCategory(Category category) {
+    public void save(Category category) {
+        categoryRepository.save(category);
+    }
+    public boolean hasBooks(Long categoryId) {
+        Category category = getById(categoryId);
+        return category != null && category.getBooks() != null && !category.getBooks().isEmpty();
+    }
+    public void update(Category category) {
         categoryRepository.save(category);
     }
 
-    public void deleteCategory(Long id) {
+    public void delete(Long id) {
         categoryRepository.deleteById(id);
-    }
-
-    public void updateCategory(Category category) {
-        categoryRepository.save(category);
     }
 }

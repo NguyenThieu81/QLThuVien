@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Tổng Hợp Mượn Trả Sách</title>
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .active {
+            background-color: #e5e7eb;
+            color: #4b5563;
+        }
+    </style>
+</head>
+<body>
+<div class="flex flex-col h-screen">
+    <header th:replace="admin-layout :: header"></header>
+    <div class="flex flex-1 overflow-hidden">
+        <div th:replace="admin-layout :: sidebar"></div>
+        <main class="flex-1 overflow-auto p-6">
+            <h1 class="text-2xl font-bold mb-6">Tổng Hợp Mượn Trả Sách</h1>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tên người dùng</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiêu đề sách</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày giao dịch</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Loại giao dịch</th>
+                    </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" th:each="transaction : ${transactionSummary}">
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${transaction[0]}"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${transaction[1]}"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${transaction[2]}"></td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" th:text="${transaction[3]}"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+</div>
+<script>
+
+    // Function to update the active menu item
+    function updateActiveMenuItem(activeItem) {
+        document.querySelectorAll('nav a').forEach(item => item.classList.remove('active'));
+        activeItem.classList.add('active');
+    }
+
+    // Function to log out
+    function logOut() {
+        window.location.href = '/login';
+    }
+
+    // Function to update date and time
+    function updateDateTime() {
+        var now = new Date();
+        var days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+        var day = days[now.getDay()];
+        var date = now.getDate();
+        var month = now.toLocaleString('default', { month: 'long' });
+        var year = now.getFullYear();
+        var hours = now.getHours();
+        var minutes = now.getMinutes().toString().padStart(2, '0');
+        document.getElementById('datetime').innerHTML = `${day}, ${date} ${month}, ${year} - ${hours}:${minutes}`;
+    }
+
+    // Update the date and time every second
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+
+// Hàm để tự động ẩn thông báo sau một khoảng thời gian
+    function hideMessage(messageId) {
+        const messageElement = document.getElementById(messageId);
+        if (messageElement) {
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 6000); // Thời gian hiển thị (3000ms = 3 giây)
+        }
+    }
+
+    // Gọi hàm để ẩn thông báo
+    hideMessage('successMessage');
+    hideMessage('errorMessage');
+
+</script>
+</body>
+</html>

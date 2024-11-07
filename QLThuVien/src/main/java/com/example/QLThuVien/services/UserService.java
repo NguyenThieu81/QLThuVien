@@ -2,18 +2,24 @@ package com.example.QLThuVien.services;
 
 
 import com.example.QLThuVien.Role;
+import com.example.QLThuVien.entity.BorrowRecord;
 import com.example.QLThuVien.entity.User;
+import com.example.QLThuVien.repository.BorrowRecordRepository;
 import com.example.QLThuVien.repository.IRoleRepository;
 import com.example.QLThuVien.repository.IUserRepository;
 import jakarta.validation.constraints.NotNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 import java.util.Optional;
 @Service
 @Slf4j
@@ -23,6 +29,8 @@ public class UserService implements UserDetailsService {
     private IUserRepository userRepository;
     @Autowired
     private IRoleRepository roleRepository;
+    @Autowired
+    private BorrowRecordRepository borrowRecordRepository;
     // Lưu người dùng mới vào cơ sở dữ liệu sau khi mã hóa mật khẩu.
     public void save(@NotNull User user) {
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
@@ -73,4 +81,17 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    // Phương thức để lấy người dùng hiện tại
+    public User getCurrentUser () {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication != null && authentication.isAuthenticated()) {
+            String username = authentication.getName();
+            return userRepository.findByUsername(username).orElse(null);
+        }
+        return null;
+    }
+
+    public List<BorrowRecord> getAllBorrowRecords() {
+        return borrowRecordRepository.findAll(); // Giả sử bạn có repository để truy xuất bản ghi mượn
+    }
 }

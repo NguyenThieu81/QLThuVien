@@ -3,9 +3,11 @@ package com.example.QLThuVien.Controller;
 import com.example.QLThuVien.entity.Book;
 import com.example.QLThuVien.services.BookService;
 import com.example.QLThuVien.services.CategoryService;
+import com.example.QLThuVien.services.AuthorService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,53 +16,49 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin/book")
 public class BookController {
     private static final String UPLOADED_DIR = "static/images/";
 
-
     @Autowired
     private BookService bookService;
 
     @Autowired
     private CategoryService categoryService;
+    @Autowired
+    private AuthorService authorService;
 
-    // Hiển thị danh sách sách
     @GetMapping
     public String showAllBooks(Model model) {
-        //List<Book> books = bookService.getALlBooks();
-       // model.addAttribute("books", books);
-        return "book/list";
+        List<Book> books = bookService.getAllBooks();
+        model.addAttribute("books", books);
+        return "admin/books";
     }
 
-    // Hiển thị form thêm sách
     @GetMapping("/add")
-    public String addBookForm(Model model) {
+    public String showAddForm(Model model) {
         model.addAttribute("book", new Book());
         model.addAttribute("categories", categoryService.getAllCategories());
-        return "book/add";
+        model.addAttribute("authors", authorService.getAllAuthors());
+        return "admin/book-add";
     }
 
-    // Xử lý thêm sách
     @PostMapping("/add")
-    public String addBook(@Valid @ModelAttribute("book") Book book,
-                          @RequestParam("image") MultipartFile file,
-                          BindingResult result, RedirectAttributes redirectAttributes, Model model) {
-        if (result.hasErrors()) {
-            model.addAttribute("categories", categoryService.getAllCategories());
-            return "book/add";
-        }
-
+    public String addBook(@Valid @ModelAttribute Book book,
+                          @RequestParam(value = "image", required = false) MultipartFile file,
+                          RedirectAttributes redirectAttributes) {
         try {
-            // Lưu ảnh sách
-            if (!file.isEmpty()) {
+            if (file != null && !file.isEmpty()) {
                 Path uploadPath = Paths.get(UPLOADED_DIR);
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
@@ -70,38 +68,35 @@ public class BookController {
                 Files.write(path, bytes);
                 book.setImagePath("/images/" + file.getOriginalFilename());
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        bookService.addBook(book);
-        return "redirect:/admin/book";
+            bookService.save(book);
+            redirectAttributes.addFlashAttribute("message", "Sách đã được thêm thành công");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+        }
+        return "redirect:/admin/book"; // Chuyển hướng về trang sách
     }
 
-    // Hiển thị form chỉnh sửa sách
     @GetMapping("/edit/{id}")
-    public String editBookForm(@PathVariable("id") Long id, Model model) {
-        Book book = bookService.getBookById(id);
-        if (book != null) {
-            model.addAttribute("book", book);
-            model.addAttribute("categories", categoryService.getAllCategories());
-            return "book/edit";
+    public String showEditForm(@PathVariable Long id, Model model) {
+        Book book = bookService.getById(id);
+        if (book == null) {
+            // Xử lý nếu không tìm thấy sách
+            return "redirect:/admin/book"; // Hoặc hiển thị thông báo lỗi
         }
-        return "redirect:/admin/book";
+        model.addAttribute("book", book);
+        model.addAttribute("categories", categoryService.getAllCategories());
+        model.addAttribute("authors", authorService.getAllAuthors());
+        return "admin/book-edit";
     }
 
-    // Xử lý cập nhật sách
     @PostMapping("/edit/{id}")
-    public String updateBook(@PathVariable("id") Long id, @RequestParam("image") MultipartFile file,
-                             @Valid @ModelAttribute("book") Book book, BindingResult result, Model model) {
-        if (result.hasErrors()) {
-            model.addAttribute("categories", categoryService.getAllCategories());
-            return "book/edit";
-        }
-
+    public String updateBook(@PathVariable Long id,
+                             @Valid @ModelAttribute Book book,
+                             @RequestParam(value = "image", required = false) MultipartFile file,
+                             RedirectAttributes redirectAttributes) {
         try {
-            // Lưu ảnh sách
-            if (!file.isEmpty()) {
+            if (file != null && !file.isEmpty()) {
                 Path uploadPath = Paths.get(UPLOADED_DIR);
                 if (!Files.exists(uploadPath)) {
                     Files.createDirectories(uploadPath);
@@ -111,29 +106,25 @@ public class BookController {
                 Files.write(path, bytes);
                 book.setImagePath("/images/" + file.getOriginalFilename());
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
 
-        bookService.updateBook(book);
-        return "redirect:/admin/book";
-    }
-    @GetMapping("/book/detail/{id}")
-    @PreAuthorize("hasAnyAuthority('USER')")
-    public String bookDetail(@PathVariable("id") Long id, Model model) {
-        Book book = bookService.getBookById(id);
-        if (book != null) {
-            model.addAttribute("book", book);
-            return "book/detail";
+            bookService.update(book);
+            redirectAttributes.addFlashAttribute("message", "Sách đã được cập nhật thành công");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
         }
-        return "redirect:/";  // Quay lại trang chủ nếu không tìm thấy sách
+        return "redirect:/admin/book"; // Chuyển hướng về trang sách
     }
 
-    // Xử lý xóa sách
-    @GetMapping("/delete/{id}")
-    public String deleteBook(@PathVariable("id") Long id, RedirectAttributes redirectAttributes) {
-        bookService.deleteBook(id);
-        redirectAttributes.addFlashAttribute("successMessage", "Sách đã được xóa thành công!");
-        return "redirect:/admin/book";
+
+    @PostMapping("/delete/{id}")
+    public String deleteBook(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            bookService.delete(id);
+            redirectAttributes.addFlashAttribute("message", "Sách đã được xóa thành công");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+        }
+        return "redirect:/admin/book"; // Redirect back to the book list
     }
+
 }

@@ -31,7 +31,7 @@ public class AdminController {
     @GetMapping
     public String adminDashboard(Model model) {
         model.addAttribute("message", "Chào mừng đến với trang quản lý admin!");
-        return "admin/dashboard2";
+        return "admin-layout";
     }
 
 

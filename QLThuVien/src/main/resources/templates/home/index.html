@@ -1,38 +1,97 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-
+<html xmlns:th="http://www.thymeleaf.org" >
 <head>
-  <meta charset="UTF-8">
-  <title>Trang Chủ - Quản lý Thư Viện</title>
-  <th:block th:replace="~{layout :: link-css}"></th:block>
+  <title>Library</title>
+  <style>
+    body {
+        font-family: 'Roboto', sans-serif;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    .content {
+        flex-grow: 1;
+    }
+     .book-card {
+        width: 150px; /* Điều chỉnh chiều rộng của khung sách */
+        height: auto; /* Để chiều cao tự động */
+        transition: transform 0.2s;
+        margin: 10px;
+    }
+    .book-card:hover {
+        transform: scale(1.05); /* Hiệu ứng phóng to khi hover */
+    }
+    .book-image {
+        width: 100%; /* Hình ảnh chiếm toàn bộ chiều rộng khung */
+        height: auto; /* Để chiều cao tự động */
+    }
+  </style>
 </head>
-
 <body>
-<th:block th:replace="~{layout::header}"></th:block>
-<div class="container mt-5">
-  <h1>Danh Sách Sách</h1>
-  <div class="row">
-    <!-- Hiển thị sách -->
-    <div class="col-md-3" th:each="book : ${books}">
-      <div class="card mb-4">
-        <img th:src="@{${book.imagePath}}" class="card-img-top" alt="Book Image">
-        <div class="card-body">
-          <h5 class="card-title" th:text="${book.title}"></h5>
-          <p class="card-text" th:text="${book.description}"></p>
-          <a href="#" class="btn btn-primary">Mượn Sách</a>
-          <a th:href="@{/admin/book/detail/{id}(id=${book.id})}" class="btn btn-info">Mô Tả</a>
-
-        </div>
+<header th:replace="layout :: header"></header>
+<div class="content">
+  <div id="notification" class="notification" th:if="${param.message}">
+    <p th:text="${param.message}"></p>
+  </div>
+  <div class="flex justify-between items-center mb-4">
+    <div class="flex space-x-4">
+      <div class="relative">
+        <select id="categorySelect" class="border rounded-full py-2 px-4">
+          <option value="">Tất cả thể loại</option>
+          <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+        </select>
+      </div>
+      <div class="relative">
+        <select id="authorSelect" class="border rounded-full py-2 px-4">
+          <option value="">Tất cả tác giả</option>
+          <option th:each="author : ${authors}" th:value="${author.id}" th:text="${author.name}"></option>
+        </select>
       </div>
     </div>
   </div>
+  <div class="flex flex-wrap justify-center">
+    <div th:each="book : ${books}" class="book-card">
+      <a th:href="@{/book/{id}(id=${book.id})}">
+        <img th:src="${book.imagePath}" alt="Hình ảnh sách" class="book-image"/>
+        <div class="p-2 flex justify-center">
+          <div class="text-center">
+            <h5 class="text-lg font-semibold" th:text="${book.title}">Tên sách</h5>
+            <p th:text="${book.author.name}">Tác giả</p>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
 </div>
-<th:block th:replace="~{layout::footer}"></th:block>
+<footer th:replace="layout :: footer"></footer>
+<script>
 
-<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  const userImage = document.getElementById('userImage');
+  const logoutForm = document.getElementById('logoutForm');
+
+  userImage.addEventListener('click', function() {
+    // Toggle hiển thị nút đăng xuất
+    if (logoutForm.classList.contains('hidden')) {
+      logoutForm.classList.remove('hidden');
+    } else {
+      logoutForm.classList.add('hidden');
+    }
+  });
+
+  // Đóng nút đăng xuất khi nhấp bên ngoài
+  document.addEventListener('click', function(event) {
+    if (!userImage.contains(event.target) && !logoutForm.contains(event.target)) {
+      logoutForm.classList.add('hidden');
+    }
+  });
+  // Hiển thị thông báo nếu có
+    const notification = document.getElementById('notification');
+    if (notification) {
+        notification.style.display = 'block'; // Hiển thị thông báo
+        setTimeout(() => {
+            notification.style.display = 'none'; // Ẩn thông báo sau 3 giây
+        }, 5000);
+    }
+</script>
 </body>
-
 </html>

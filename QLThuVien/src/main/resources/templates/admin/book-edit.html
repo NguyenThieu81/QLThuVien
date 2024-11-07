@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Cập nhật sách</title>
+    <link rel="stylesheet" th:href="@{/css/header.css}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+<div class="flex flex-col h-screen">
+    <header th:replace="admin-layout :: header"></header>
+    <div class="flex flex-1 overflow-hidden">
+        <div th:replace="admin-layout :: sidebar"></div>
+        <main class="flex-1 overflow-auto">
+            <div class="p-6">
+                <h1 class="text-2xl font-bold text-gray-800">Cập nhật sách</h1>
+
+                <!-- Form cập nhật sách -->
+                <form th:action="@{/admin/book/edit/{id}(id=${book.id})}" method="POST" enctype="multipart/form-data" id="editBookForm">
+                    <div class="grid grid-cols-2 gap-6">
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Tên sách</label>
+                            <input type="text" th:field="${book.title}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Tác Giả</label>
+                            <select th:field="${book.author.id}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                                <option value="">Chọn tác giả</option>
+                                <option th:each="author : ${authors}" th:value="${author.id}" th:text="${author.name}"></option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Thể loại</label>
+                            <select th:field="${book.category.id}" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                                <option value="">Chọn thể loại</option>
+                                <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+                            </select>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Số lượng</label>
+                            <input type="number" th:field="${book.quantity}" min="0" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500" required>
+                        </div>
+                        <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700">Hình ảnh</label>
+                            <input type="file" name="image" accept="image/*" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                            <div th:if="${book.imagePath}" class="mt-2">
+                                <img th:src="@{${book.imagePath}}" class="h-20 w-20 object-cover rounded-md">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-2">
+                        <label class="block text-sm font-medium text-gray-700">Mô tả</label>
+                        <textarea th:field="${book.description}" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"></textarea>
+                    </div>
+                    <div class="flex justify-end space-x-3">
+                        <button type="button" onclick="window.location.href='/admin/book'" class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">Hủy</button>
+                        <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">Lưu</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+</div>
+<script>
+    // Function to update the active menu item
+    function updateActiveMenuItem(activeItem) {
+        document.querySelectorAll('nav a').forEach(item => item.classList.remove('active'));
+        activeItem.classList.add('active');
+    }
+
+    // Function to log out
+    function logOut() {
+        window.location.href = '/login';
+    }
+
+    // Function to update date and time
+    function updateDateTime() {
+        var now = new Date();
+        var days = ['Chủ Nhật', 'Thứ Hai', 'Thứ Ba', 'Thứ Tư', 'Thứ Năm', 'Thứ Sáu', 'Thứ Bảy'];
+        var day = days[now.getDay()];
+        var date = now.getDate();
+        var month = now.toLocaleString('default', { month: 'long' });
+        var year = now.getFullYear();
+        var hours = now.getHours();
+        var minutes = now.getMinutes().toString().padStart(2, '0');
+        document.getElementById('datetime').innerHTML = `${day}, ${date} ${month}, ${year} - ${hours}:${minutes}`;
+    }
+
+    // Update the date and time every second
+    setInterval(updateDateTime, 1000);
+    updateDateTime();
+</script>
+
+</body>
+</html>

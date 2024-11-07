@@ -1,290 +1,98 @@
-<html xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity" xmlns:th="http://www.thymeleaf.org">
-<head>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity">
+<head th:fragment="header">
   <meta charset="utf-8"/>
-  <title>
-    Quản lý Thư Viện - Online Library
-  </title>
-  <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}"/>
-  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet"/>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.1/css/all.min.css" rel="stylesheet"/>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+  <title>Quản lý Thư Viện - Online Library</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet"/>
   <style>
     body {
-       font-family: 'Roboto', sans-serif;
-       background-color: #f8f9fa;
-       display: flex;
-       flex-direction: column;
-       min-height: 100vh;
-     }
-
-     .navbar {
-       background-color: #343a40;
-     }
-
-     .navbar-brand img {
-       max-height: 40px;
-     }
-
-     .navbar-nav .nav-link {
-       color: #ffffff;
-       margin-right: 15px;
-     }
-
-     .navbar-nav .nav-link.active {
-       background-color: #495057;
-       border-radius: 5px;
-     }
-
-     .form-inline .form-control {
-       border-radius: 20px;
-       padding-right: 40px;
-       margin-top: 10px; /* Adjust this value to lower the search box */
-     }
-
-     .form-inline .input-group-append .btn {
-       border: none;
-       background: none;
-       color: #6c757d;
-     }
-
-     .form-inline .input-group-append .btn:hover {
-       color: #343a40;
-     }
-
-     .footer {
-       background-color: #343a40;
-       color: #ffffff;
-       padding: 20px 0;
-       text-align: center;
-       width: 100%;
-     }
-
-     .footer span {
-       font-size: 14px;
-     }
-
-     .container {
-       margin-top: 30px;
-       flex: 1;
-     }
-
-     .card {
-       margin-bottom: 20px;
-     }
-
-     .card img {
-       border-top-left-radius: 5px;
-       border-top-right-radius: 5px;
-     }
-
-     .card-title {
-       font-size: 1.25rem;
-       font-weight: 500;
-     }
-
-     .card-text {
-       font-size: 1rem;
-       color: #6c757d;
-     }
-
-     .btn-primary {
-       background-color: #007bff;
-       border-color: #007bff;
-     }
-
-     .btn-primary:hover {
-       background-color: #0056b3;
-       border-color: #0056b3;
-     }
-
-     .search-filter {
-       margin-bottom: 20px;
-       padding: 20px;
-       background-color: #ffffff;
-       border-radius: 5px;
-       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-     }
-
-     .search-filter .form-control {
-       margin-bottom: 10px;
-     }
-
-     .search-filter .btn {
-       width: 100%;
-     }
+        font-family: 'Roboto', sans-serif;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh; /* Đảm bảo chiều cao tối thiểu bằng chiều cao của cửa sổ trình duyệt */
+    }
   </style>
 </head>
 <body>
-<!-- Header -->
 <header th:fragment="header">
-  <nav class="navbar navbar-expand-lg navbar-dark">
-    <div class="container-fluid">
-      <a class="navbar-brand" th:href="@{/}">
-        <img alt="Library logo with a stylized book icon" height="40" src="https://storage.googleapis.com/a1aa/image/i1Ge29oeRFkeeSH4KfSoofIHlDeadOXGfixK4s04HQQwlmWqTA.jpg" width="40"/>
-      </a>
-      <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler" data-bs-target="#navbarSupportedContent" data-bs-toggle="collapse" type="button">
-      <span class="navbar-toggler-icon">
-      </span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link active" href="/index">
-              Trang chủ
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              Giới thiệu
-            </a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#">
-              Liên hệ
-            </a>
-          </li>
-          <li class="nav-item dropdown">
-            <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" id="navbarDropdown" role="button">
-              Thể loại
-            </a>
-            <div aria-labelledby="navbarDropdown" class="dropdown-menu">
-              <a class="dropdown-item" href="#">
-                Tiểu Thuyết Kinh Điển
-              </a>
-              <a class="dropdown-item" href="#">
-                Khoa Học Viễn Tưởng
-              </a>
-              <a class="dropdown-item" href="#">
-                Lịch Sử
-              </a>
-            </div>
-          </li>
+  <nav class="bg-gray-800 p-4">
+    <div class="flex justify-between items-center">
+      <div class="flex items-center space-x-4">
+        <a class="navbar-brand" th:href="@{/}">
+          <img src="/image/logo.png" alt="Logo" style="max-height: 40px;">
+        </a>
+        <ul class="flex space-x-4">
+          <li><a href="/" class="text-white hover:bg-gray-700 px-3 py-2 rounded">Trang chủ</a></li>
+          <li><a href="#" class="text-white hover:bg-gray-700 px-3 py-2 rounded">Giới thiệu</a></li>
+          <li><a href="#" class="text-white hover:bg-gray-700 px-3 py-2 rounded">Liên hệ</a></li>
         </ul>
-        <form class="form-inline ml-auto">
-          <div class="input-group">
-            <input aria-label="Search" class="form-control" placeholder="Tìm kiếm" style="margin-top: 10px;" type="search"/>
-            <div class="input-group-append">
-              <button class="btn" type="submit">
-                <i class="fas fa-search">
-                </i>
-              </button>
-            </div>
-          </div>
+      </div>
+      <div class="flex items-center">
+        <form class="relative ml-4">
+          <input type="search" placeholder="Tìm kiếm" class="rounded-full pl-4 pr-10 py-2 focus:outline-none"/>
+          <button type="submit" class="absolute right-0 top-0 mt-2 mr-3 text-gray-500 hover:text-gray-700">
+            <i class="fas fa-search"></i>
+          </button>
         </form>
-        <ul class="navbar-nav ml-2">
-          <li class="nav-item" sec:authorize="!isAuthenticated()">
-            <a class="nav-link" href="/login">
-              Đăng nhập
-            </a>
-          </li>
-          <li class="nav-item" sec:authorize="!isAuthenticated()">
-            <a class="nav-link" href="/signup">
-              Đăng ký
-            </a>
-          </li>
-        </ul>
+        <div class="relative ml-4">
+          <a href="/borrow" class="text-white hover:bg-gray-700 px-3 py-2 rounded flex items-center">
+            <img src="/image/bookshelf.png" alt="bookshelf" class="h-6 w-6"/>
+            <span class="ml-1 text-sm" th:text="${cartItemCount}">0</span> <!-- Số lượng sách mượn -->
+          </a>
+        </div>
+        <div class="ml-4 flex items-center relative">
+          <span sec:authorize="isAuthenticated()" class="flex items-center">
+            <img src="/image/user1.png" alt="User " class="h-8 w-8 rounded-full cursor-pointer" id="userImage"/>
+            <span class="text-white ml-2" th:text="${#authentication.name}">Tên người dùng</span>
+            <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()" class="absolute top-full right-0 hidden mt-2" id="logoutForm">
+              <button type="submit" class="bg-gray-800 text-white border border-white px-2 py-1 rounded hover:bg-gray-700">
+                Đăng xuất
+              </button>
+            </form>
+          </span>
+          <a href="/login" sec:authorize="!isAuthenticated()" class="text-white border border-white px-3 py-2 rounded hover:bg-gray-700 ml-4">
+            Đăng nhập
+          </a>
+        </div>
       </div>
     </div>
   </nav>
 </header>
-<!-- Content -->
-<div th:fragment="content">
-  <div class="container mt-5">
-    <div class="search-filter">
-      <div class="row">
-        <div class="col-md-4">
-          <input class="form-control" placeholder="Tìm kiếm sách" type="text"/>
-        </div>
-        <div class="col-md-4">
-          <select class="form-control">
-            <option value="">
-              Chọn thể loại
-            </option>
-            <option value="classic">
-              Tiểu Thuyết Kinh Điển
-            </option>
-            <option value="sci-fi">
-              Khoa Học Viễn Tưởng
-            </option>
-            <option value="history">
-              Lịch Sử
-            </option>
-          </select>
-        </div>
-        <div class="col-md-4">
-          <button class="btn btn-primary" type="button">
-            Lọc
-          </button>
-        </div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-4">
-        <div class="card">
-          <img alt="Image of a classic novel book cover" class="card-img-top" height="200" src="https://storage.googleapis.com/a1aa/image/jstbwQXD724OBF9YYRM7jJRDL87eQUHiklPHGtOh5lUSTL1JA.jpg" width="300"/>
-          <div class="card-body">
-            <h5 class="card-title">
-              Tiểu Thuyết Kinh Điển
-            </h5>
-            <p class="card-text">
-              Mô tả ngắn gọn về cuốn tiểu thuyết kinh điển.
-            </p>
-            <a class="btn btn-primary" href="#">
-              Xem chi tiết
-            </a>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card">
-          <img alt="Image of a science fiction book cover" class="card-img-top" height="200" src="https://storage.googleapis.com/a1aa/image/exOAhZ9L6TyIHSuBwsFNIkwxARj947W3xXA6ytkle4gjmWqTA.jpg" width="300"/>
-          <div class="card-body">
-            <h5 class="card-title">
-              Khoa Học Viễn Tưởng
-            </h5>
-            <p class="card-text">
-              Mô tả ngắn gọn về cuốn sách khoa học viễn tưởng.
-            </p>
-            <a class="btn btn-primary" href="#">
-              Xem chi tiết
-            </a>
-          </div>
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="card">
-          <img alt="Image of a historical book cover" class="card-img-top" height="200" src="https://storage.googleapis.com/a1aa/image/4DLlNuMm0a4kKFf6FJbcTgiSiIbG5242HrBmuBTf38eDNtUnA.jpg" width="300"/>
-          <div class="card-body">
-            <h5 class="card-title">
-              Lịch Sử
-            </h5>
-            <p class="card-text">
-              Mô tả ngắn gọn về cuốn sách lịch sử.
-            </p>
-            <a class="btn btn-primary" href="#">
-              Xem chi tiết
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
+
+<main th:fragment="content">
+  <div class="container mx-auto mt-4">
+    <p>Replaceable content goes here</p>
   </div>
-</div>
-<!-- Footer -->
-<footer class="footer" th:fragment="footer">
-  <div class="container">
-    <span>
-     © 2024 Quản lý Thư Viện. Tất cả các quyền được bảo lưu.
-    </span>
+</main>
+
+<footer th:fragment="footer" class="bg-gray-800 text-white py-4">
+  <div class="container mx-auto text-center">
+    <span>© 2024 Quản lý Thư Viện. Tất cả các quyền được bảo lưu.</span>
   </div>
 </footer>
-<script th:src="@{/js/bootstrap.min.js}">
-</script>
-<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js">
-</script>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js">
-</script>
-<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js">
+<script>
+
+  const userImage = document.getElementById('userImage');
+  const logoutForm = document.getElementById('logoutForm');
+
+  userImage.addEventListener('click', function() {
+    // Toggle hiển thị nút đăng xuất
+    if (logoutForm.classList.contains('hidden')) {
+      logoutForm.classList.remove('hidden');
+    } else {
+      logoutForm.classList.add('hidden');
+    }
+  });
+
+  // Đóng nút đăng xuất khi nhấp bên ngoài
+  document.addEventListener('click', function(event) {
+    if (!userImage.contains(event.target) && !logoutForm.contains(event.target)) {
+      logoutForm.classList.add('hidden');
+    }
+  });
 </script>
 </body>
 </html>

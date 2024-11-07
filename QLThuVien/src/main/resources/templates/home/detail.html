@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      >
+<head>
+    <meta charset="utf-8"/>
+    <title th:text="${book.title}">Chi tiết sách</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"/>
+    <style>
+        body {
+                font-family: 'Roboto', sans-serif;
+                display: flex;
+                flex-direction: column;
+                min-height: 100vh;
+            }
+            .content {
+                flex-grow: 1;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: 20px;
+            }
+            .book-detail {
+                display: flex;
+                justify-content: space-between; /* Tạo khoảng cách giữa hình ảnh và thông tin */
+                align-items: center; /* Căn giữa theo chiều dọc */
+                max-width: 800px;
+                width: 100%;
+                background: #f9f9f9;
+                border-radius: 8px;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            }
+            .book-image {
+                width: 250px; /* Kích thước cố định cho chiều rộng */
+                height: 350px; /* Kích thước cố định cho chiều cao */
+                border-radius: 8px 0 0 8px;
+                object-fit: cover; /* Giữ tỷ lệ khung hình */
+            }
+            .book-info {
+                padding: 20px;
+                flex-grow: 1;
+                max-width: calc(100% - 250px);/* Giảm chiều rộng tối đa của phần thông tin */
+            }
+            .book-title {
+                font-size: 1.5rem;
+                font-weight: 500;
+            }
+            .book-author, .book-category, .book-quantity {
+                margin: 10px 0;
+            }
+            .borrow-button {
+                margin-top: 20px;
+                padding: 10px 20px;
+                background-color: #4CAF50;
+                color: white;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 16px;
+            }
+            .borrow-button:hover {
+                background-color: #45a049;
+            }
+        .notification {
+            display: none; /* Ẩn thông báo mặc định */
+            padding: 10px;
+            background-color: #4CAF50; /* Màu nền thông báo */
+            color: white;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+<header th:replace="layout :: header"></header>
+
+<div class="content">
+    <div id="notification" class="notification" th:if="${param.message}">
+        <p th:text="${param.message}"></p>
+    </div>
+    <div class="book-detail">
+        <img th:src="${book.imagePath}" alt="Hình ảnh sách" class="book-image"/>
+        <div class="book-info">
+            <h2 class="book-title" th:text="${book.title}">Tên sách</h2>
+            <p class="book-author" th:text="'Tác giả: ' + ${book.author.name}">Tác giả</p>
+            <p class="book-category" th:text="'Thể loại: ' + ${book.category.name}">Thể loại</p>
+            <p class="book-quantity" th:text="'Số lượng: ' + ${book.quantity}">Số lượng</p>
+            <p class="book-description" th:text="${book.description}">Mô tả</p>
+            <form th:action="@{/book/{id}/borrow(id=${book.id})}" method="post">
+                <button type="submit" class="borrow-button">Mượn sách</button>
+            </form>
+        </div>
+    </div>
+</div>
+<footer th:replace="layout :: footer"></footer>
+<script>
+
+    const userImage = document.getElementById('userImage');
+    const logoutForm = document.getElementById('logoutForm');
+
+    userImage.addEventListener('click', function() {
+      // Toggle hiển thị nút đăng xuất
+      if (logoutForm.classList.contains('hidden')) {
+        logoutForm.classList.remove('hidden');
+      } else {
+        logoutForm.classList.add('hidden');
+      }
+    });
+
+    // Đóng nút đăng xuất khi nhấp bên ngoài
+    document.addEventListener('click', function(event) {
+      if (!userImage.contains(event.target) && !logoutForm.contains(event.target)) {
+        logoutForm.classList.add('hidden');
+      }
+    });
+   const notification = document.getElementById('notification');
+
+    // Hiển thị thông báo nếu có
+    if (notification && notification.innerText.trim() !== '') {
+        notification.style.display = 'block'; // Hiển thị thông báo
+        setTimeout(() => {
+            notification.style.display = 'none'; // Ẩ n thông báo sau 5 giây
+        }, 5000);
+    }
+</script>
+</body>
+</html>

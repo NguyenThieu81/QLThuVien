@@ -1,0 +1,31 @@
+body {
+        font-family: 'Roboto', sans-serif;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh; /* Đảm bảo chiều cao tối thiểu bằng chiều cao của cửa sổ trình duyệt */
+    }
+    .content {
+        flex-grow: 1; /* Nội dung chính sẽ mở rộng để lấp đầy không gian còn lại */
+    }
+    .book-card {
+        width: 150px; /* Điều chỉnh chiều rộng của khung sách */
+        height: 300px; /* Đặt chiều cao cố định cho khung sách */
+        transition: transform 0.2s;
+        margin: 10px;
+        display: flex;
+        flex-direction: column; /* Để sắp xếp nội dung theo chiều dọc */
+        justify-content: space-between; /* Để phân bố không gian đều giữa các phần tử */
+    }
+    .book-card:hover {
+        transform: scale(1.05); /* Hiệu ứng phóng to khi hover */
+    }
+    .book-image {
+        width: 100%; /* Hình ảnh chiếm toàn bộ chiều rộng khung */
+        height: auto; /* Để chiều cao tự động */
+        flex-grow: 1; /* Để hình ảnh mở rộng để lấp đầy không gian */
+        object-fit: cover; /* Đảm bảo hình ảnh không bị méo */
+    }
+    .book-title {
+        font-size: 0.9rem; /* Giảm kích thước chữ của tên sách */
+        margin: 0; /* Để loại bỏ khoảng cách mặc định */
+    }

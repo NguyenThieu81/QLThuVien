@@ -4,10 +4,12 @@ import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,7 +25,6 @@ public class SecurityConfig {
     public UserDetailsService userDetailsService() {
         return userService; // Trả về dịch vụ UserService trực tiếp.
     }
-
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(); // Sử dụng BCrypt để mã hóa mật khẩu.
@@ -47,8 +48,9 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/css/**", "/js/**", "/", "/oauth/**", "/register", "/error").permitAll() // Không yêu cầu xác thực.
-                        .requestMatchers("/admin/**","/admin/book/**","/admin/category/**").hasRole("ADMIN") // Chỉ ADMIN có quyền.
+                        .requestMatchers("/css/**", "/js/**", "/", "/oauth/**", "/register", "/error","/image/**").permitAll() // Không yêu cầu xác thực.
+                        .requestMatchers("/admin/**","/admin/book/**","/admin/category/**","/admin/author/**","/admin/borrow-management").hasRole("ADMIN")
+
                         .requestMatchers("/api/**").permitAll() // API mở cho mọi người.
                         .anyRequest().authenticated() // Yêu cầu xác thực cho các yêu cầu khác.
                 )
@@ -61,7 +63,7 @@ public class SecurityConfig {
                 )
                 .logout(logout -> logout
                         .logoutUrl("/logout")
-                        .logoutSuccessUrl("/") // Chuyển hướng sau khi đăng xuất.
+                        .logoutSuccessUrl("/login") // Chuyển hướng sau khi đăng xuất.
                         .deleteCookies("JSESSIONID") // Xóa cookie JSESSIONID.
                         .invalidateHttpSession(true) // Hủy phiên đăng nhập.
                         .clearAuthentication(true) // Xóa xác thực.
@@ -77,6 +79,7 @@ public class SecurityConfig {
                         .maximumSessions(1) // Chỉ cho phép 1 phiên đăng nhập.
                         .expiredUrl("/login") // Chuyển hướng khi phiên hết hạn.
                 )
+
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .accessDeniedPage("/403") // Trang xử lý truy cập bị từ chối.
                         .accessDeniedHandler(customAccessDeniedHandler()) // Xử lý ngoại lệ truy cập bị từ chối.
