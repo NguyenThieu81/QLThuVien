@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      >
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8"/>
     <title th:text="${book.title}">Chi tiết sách</title>
@@ -86,9 +85,6 @@
             <p class="book-category" th:text="'Thể loại: ' + ${book.category.name}">Thể loại</p>
             <p class="book-quantity" th:text="'Số lượng: ' + ${book.quantity}">Số lượng</p>
             <p class="book-description" th:text="${book.description}">Mô tả</p>
-            <form th:action="@{/book/{id}/borrow(id=${book.id})}" method="post">
-                <button type="submit" class="borrow-button">Mượn sách</button>
-            </form>
         </div>
     </div>
 </div>
@@ -122,6 +118,21 @@
             notification.style.display = 'none'; // Ẩ n thông báo sau 5 giây
         }, 5000);
     }
+const notificationIcon = document.getElementById('notificationIcon');
+const notificationDropdown = document.getElementById('notificationDropdown');
+
+notificationIcon.addEventListener('click', function(event) {
+    event.stopPropagation(); // Prevent the click from bubbling up
+    notificationDropdown.classList.toggle('hidden'); // Toggle the dropdown
+});
+
+// Close the dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    if (!notificationIcon.contains(event.target) && !notificationDropdown.contains(event.target)) {
+        notificationDropdown.classList.add('hidden');
+    }
+});
+
 </script>
 </body>
 </html>

@@ -1,9 +1,8 @@
 package com.example.QLThuVien.Controller;
 
+import com.example.QLThuVien.entity.AdminNotification;
 import com.example.QLThuVien.entity.Book;
-import com.example.QLThuVien.services.BookService;
-import com.example.QLThuVien.services.CategoryService;
-import com.example.QLThuVien.services.AuthorService;
+import com.example.QLThuVien.services.*;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -37,9 +36,14 @@ public class BookController {
     private CategoryService categoryService;
     @Autowired
     private AuthorService authorService;
+    @Autowired private AdminNotificationService adminNotificationService;
 
     @GetMapping
     public String showAllBooks(Model model) {
+        List<AdminNotification> adminNotifications = adminNotificationService.getAllAdminNotifications();
+        long unreadAdminNotificationCount = adminNotificationService.countUnreadAdminNotifications();
+        model.addAttribute("adminNotifications", adminNotifications); // Đảm bảo tên này khớp với tên trong HTML // Đảm bảo tên này khớp với tên trong HTML
+        model.addAttribute("unreadAdminNotificationCount", unreadAdminNotificationCount); // Thêm biến này vào mô hình
         List<Book> books = bookService.getAllBooks();
         model.addAttribute("books", books);
         return "admin/books";
@@ -47,6 +51,10 @@ public class BookController {
 
     @GetMapping("/add")
     public String showAddForm(Model model) {
+        List<AdminNotification> adminNotifications = adminNotificationService.getAllAdminNotifications();
+        long unreadAdminNotificationCount = adminNotificationService.countUnreadAdminNotifications();
+        model.addAttribute("adminNotifications", adminNotifications); // Đảm bảo tên này khớp với tên trong HTML // Đảm bảo tên này khớp với tên trong HTML
+        model.addAttribute("unreadAdminNotificationCount", unreadAdminNotificationCount); // Thêm biến này vào mô hình
         model.addAttribute("book", new Book());
         model.addAttribute("categories", categoryService.getAllCategories());
         model.addAttribute("authors", authorService.getAllAuthors());
@@ -84,6 +92,10 @@ public class BookController {
             // Xử lý nếu không tìm thấy sách
             return "redirect:/admin/book"; // Hoặc hiển thị thông báo lỗi
         }
+        List<AdminNotification> adminNotifications = adminNotificationService.getAllAdminNotifications();
+        long unreadAdminNotificationCount = adminNotificationService.countUnreadAdminNotifications();
+        model.addAttribute("adminNotifications", adminNotifications); // Đảm bảo tên này khớp với tên trong HTML// Đảm bảo tên này khớp với tên trong HTML
+        model.addAttribute("unreadAdminNotificationCount", unreadAdminNotificationCount); // Thêm biến này vào mô hình
         model.addAttribute("book", book);
         model.addAttribute("categories", categoryService.getAllCategories());
         model.addAttribute("authors", authorService.getAllAuthors());

@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>Lịch Sử Trả Sách</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"/>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        .content {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .history-detail {
+            max-width: 800px;
+            width: 100%;
+            background: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+        .book-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        .book-item img {
+            width: 50px;
+            height: 75px;
+            margin-right: 10px;
+        }
+        .total-cost {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .appointment-item {
+            margin-bottom: 20px; /* Khoảng cách giữa các cuộc hẹn */
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background: #fff;
+        }
+    </style>
+</head>
+<body>
+<header th:replace="layout :: header"></header>
+
+<div class="content">
+    <div class="history-detail">
+        <h2 class="text-2xl font-semibold mb-4">Lịch Sử Trả Sách</h2>
+
+        <div th:if="${#lists.isEmpty(returnedAppointments)}">
+            <p>Không có thông tin nào để hiển thị.</p>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(returnedAppointments)}" th:each="appointment : ${returnedAppointments}" class="appointment-item">
+            <h3 class="text-lg font-semibold">Ngày Trả Sách: <span th:text="${appointment.getFormattedReturnDate()}"></span></h3>
+            <div th:each="returnRecord : ${appointment.appointmentBooks}" class="book-item">
+                <div class="flex items-center">
+                    <img th:src="@{${returnRecord.book.imagePath}}" alt="Hình ảnh sách" />
+                    <div>
+                        <h4 th:text="${returnRecord.book.title}">Tên sách</h4>
+                        <p th:text="'Tiền mượn: ' + ${returnRecord.cost} + ' VNĐ'">Tiền mượn</p>
+                    </div>
+                </div>
+                <div>
+                    <a class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-green-700" th:href="@{/book/{id}(id=${returnRecord.book.id})}">
+                        Chi tiết
+                    </a>
+                </div>
+            </div>
+            <h4 class="total-cost">Tổng tiền trả: <span th:text="${appointment.totalCost}"></span> VNĐ</h4>
+        </div>
+    </div>
+</div>
+<footer th:replace="layout :: footer"></footer>
+<script>
+    const userImage = document.getElementById('userImage');
+    const logoutForm = document.getElementById('logoutForm');
+
+    userImage.addEventListener('click', function() {
+        if (logoutForm.classList.contains('hidden')) {
+            logoutForm.classList.remove('hidden');
+        } else {
+            logoutForm.classList.add('hidden');
+        }
+    });
+
+    document.addEventListener('click', function(event) {
+        if (!userImage.contains(event.target) && !logoutForm.contains(event.target)) {
+            logoutForm.classList.add('hidden');
+ }
+    });
+
+    const notificationIcon = document.getElementById('notificationIcon');
+    const notificationDropdown = document.getElementById('notificationDropdown');
+
+    notificationIcon.addEventListener('click', function(event) {
+        event.stopPropagation(); // Prevent the click from bubbling up
+        notificationDropdown.classList.toggle('hidden'); // Toggle the dropdown
+    });
+
+    // Close the dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!notificationIcon.contains(event.target) && !notificationDropdown.contains(event.target)) {
+            notificationDropdown.classList.add('hidden');
+        }
+    });
+
+</script>
+</body>
+</html>

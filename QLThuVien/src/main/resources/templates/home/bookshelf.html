@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <title>Sách Đang Mượn</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"/>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .content {
+            flex-grow: 1;
+            padding: 20px;
+        }
+        .bookshelf {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #f9f9f9;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .total-cost {
+            font-weight: bold;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<header th:replace="layout :: header"></header>
+
+<div class="content">
+    <div class="bookshelf">
+        <h1 class="text-2xl font-bold mb-4">Sách Đang Mượn</h1>
+
+        <div th:if="${#lists.isEmpty(appointmentBooks)}">
+            <p>Không có sách nào đang mượn.</p>
+        </div>
+
+        <div th:if="${!#lists.isEmpty(appointmentBooks)}">
+            <table>
+                <thead>
+                <tr>
+                    <th>Tên Sách</th>
+                    <th>Giá Mượn</th>
+                    <th>Ngày Mượn</th>
+                    <th>Ngày Trả</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="appointmentBook : ${appointmentBooks}">
+                    <td class="flex items-center">
+                        <img th:src="@{${appointmentBook.book.imagePath}}" alt="Hình ảnh sách" class="w-10 h-15 mr-2" />
+                        <span th:text="${appointmentBook.book.title}">Tên sách</span>
+                    </td>
+                    <td th:text="${appointmentBook.cost}">Giá mượn</td>
+                    <td th:text="${appointmentBook.appointment.getFormattedBorrowDate()}">Ngày mượn</td>
+                    <td th:text="${appointmentBook.appointment.getFormattedReturnDate()}">Ngày trả</td>
+                </tr>
+                </tbody>
+            </table>
+
+            <h3 class="total-cost">Tổng tiền: <span th:text="${totalCost}"></span></h3>
+        </div>
+    </div>
+</div>
+
+<footer th:replace="layout :: footer"></footer>
+<script>
+    const userImage = document.getElementById('userImage');
+    const logoutForm = document.getElementById('logoutForm');
+
+    userImage.addEventListener('click', function() {
+        if (logoutForm.classList.contains('hidden')) {
+            logoutForm.classList.remove('hidden');
+        } else {
+            logoutForm.classList.add('hidden');
+        }
+    });
+
+    document.addEventListener('click', function(event) {
+        if (!userImage.contains(event.target) && !logoutForm.contains(event.target)) {
+            logoutForm.classList.add('hidden');
+        }
+    });
+
+    const notificationIcon = document.getElementById('notificationIcon');
+    const notificationDropdown = document.getElementById('notificationDropdown');
+
+    notificationIcon.addEventListener('click', function(event) {
+        event.stopPropagation(); // Prevent the click from bubbling up
+        notificationDropdown.classList.toggle('hidden'); // Toggle the dropdown
+    });
+
+    // Close the dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!notificationIcon.contains(event.target) && !notificationDropdown.contains(event.target)) {
+            notificationDropdown.classList.add('hidden');
+        }
+    });
+
+</script>
+</body>
+</html>

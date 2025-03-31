@@ -12,6 +12,7 @@
             background-color: #e5e7eb;
             color: #4b5563;
         }
+
     </style>
 </head>
 <body>
@@ -29,9 +30,27 @@
             </div>
             <div class="flex items-center">
                 <span class="text-gray-600" id="datetime"></span>
-                <button class="ml-6 text-gray-600">
-                    <i class="fas fa-bell"></i>
-                </button>
+                <div class="relative ml-6">
+                    <button class="text-gray-600" id="adminNotificationIcon">
+                        <i class="fas fa-bell"></i>
+                        <span class="absolute top-0 right-0 transform translate-x-1/2 -translate-y-1/2 bg-red-500 text-white text-xs rounded-full px-1"
+                              th:if="${unreadAdminNotificationCount > 0}"
+                              th:text="${unreadAdminNotificationCount}"></span>
+                    </button>
+                    <div id="adminNotificationDropdown" class="notification-dropdown hidden">
+                        <div class="p-2">
+                            <h3 class="font-semibold">Thông Báo Admin</h3>
+                            <form th:action="@{/admin/notifications/mark-all-read}" method="post" style="display: inline;">
+                <span class="cursor-pointer text-blue-500 hover:underline px-2 py-1" style="padding: 8px; cursor: pointer;" onclick="this.closest('form').submit();">
+                    Đánh dấu tất cả đã đọc
+                </span>
+                            </form>
+                            <li th:each="adminNotification : ${adminNotifications}" class="py-1 px-2 hover:bg-gray-200">
+                                <a th:href="@{/admin/notification/{id}(id=${adminNotification.id})}" th:text="${adminNotification.message}"></a>
+                            </li>
+                        </div>
+                    </div>
+                </div>
                 <div class="ml-6 relative flex items-center">
                     <div class="w-10 h-10 bg-blue-500 rounded-full flex items-center justify-center text-white">
                         <i class="fas fa-user"></i>
@@ -53,7 +72,7 @@
                 <nav class="mt-4">
                     <p class="text-gray-600 uppercase text-xs font-semibold px-6">Main Menu</p>
                     <a class="flex items-center px-6 py-3 mt-4 text-gray-600 hover:bg-gray-200 rounded-md active"
-                       th:href="@{/admin}"
+                       th:href ="@{/admin}"
                        onclick="updateActiveMenuItem(this);">
                         <i class="fas fa-home"></i>
                         <span class="mx-3">Trang Chủ</span>
@@ -77,10 +96,16 @@
                         <span class="mx-3">Tác Giả</span>
                     </a>
                     <a class="flex items-center px-6 py-3 mt-4 text-gray-600 hover:bg-gray-200 rounded-md"
-                       th:href="@{/admin/borrow-management}"
+                       th:href="@{/admin/appointments}"
                        onclick="updateActiveMenuItem(this);">
-                        <i class="fas fa-feather-alt"></i>
-                        <span class="mx-3">Quản lý Mượn/Trả</span>
+                        <i class="fas fa-calendar-day"></i>
+                        <span class="mx-3">Quản lý Lịch Hẹn</span>
+                    </a>
+                    <a class="flex items-center px-6 py-3 mt-4 text-gray-600 hover:bg-gray-200 rounded-md"
+                       th:href="@{/admin/returns}"
+                       onclick="updateActiveMenuItem(this);">
+                        <i class="fas fa-clipboard-check"></i>
+                        <span class="mx-3">Quản lý Mượn/Trả Sách</span>
                     </a>
                 </nav>
                 <div class="mt-10">
@@ -94,7 +119,6 @@
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 
@@ -104,6 +128,7 @@
         document.querySelectorAll('nav a').forEach(item => item.classList.remove('active'));
         activeItem.classList.add('active');
     }
+
 
     // Function to log out
     function logOut() {
@@ -126,7 +151,24 @@
     // Update the date and time every second
     setInterval(updateDateTime, 1000);
     updateDateTime();
-</script>
 
+
+    // Lấy các phần tử cần thiết
+const adminNotificationIcon = document.getElementById('adminNotificationIcon');
+const adminNotificationDropdown = document.getElementById('adminNotificationDropdown');
+
+// Hiển thị hoặc ẩn dropdown khi nhấp vào biểu tượng thông báo
+adminNotificationIcon.addEventListener('click', function(event) {
+    event.stopPropagation(); // Ngăn chặn sự kiện click từ lan ra ngoài
+    adminNotificationDropdown.style.display = adminNotificationDropdown.style.display === 'block' ? 'none' : 'block'; // Chuyển đổi hiển thị
+});
+
+// Đóng dropdown khi nhấp bên ngoài
+document.addEventListener('click', function(event) {
+    if (!adminNotificationIcon.contains(event.target) && !adminNotificationDropdown.contains(event.target)) {
+        adminNotificationDropdown.style.display = 'none'; // Ẩn dropdown
+    }
+});
+</script>
 </body>
 </html>

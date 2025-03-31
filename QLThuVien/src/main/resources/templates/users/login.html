@@ -93,15 +93,25 @@
                  height: 50px;
                  width: 50px;
              }
-             .login-form .social-login a.google {
-                 background-color: #db4437;
-             }
-             .login-form .social-login a.google:hover {
-                 background-color: #c23321;
-             }
-             .login-form .social-login i {
-                 margin-right: 0;
-             }
+    .login-form .social-login a.google {
+    display: flex; /* Để căn giữa hình ảnh */
+    align-items: center; /* Căn giữa theo chiều dọc */
+    justify-content: center; /* Căn giữa theo chiều ngang */
+    padding: 10px; /* Khoảng cách bên trong */
+    border-radius: 30px; /* Bo tròn góc */
+    text-decoration: none; /* Bỏ gạch chân */
+    border: 2px solid transparent; /* Viền trong suốt */
+    background-color: #ffffff; /* Màu nền trắng */
+    transition: background-color 0.3s, border-color 0.3s; /* Hiệu ứng chuyển động */
+    width: 50px; /* Chiều rộng của nút */
+    height: 50px; /* Chiều cao của nút */
+}
+
+
+.login-form .social-login img {
+    width: 24px; /* Kích thước hình ảnh */
+    height: 24px; /* Kích thước hình ảnh */
+}
     </style>
 </head>
 <body>
@@ -136,9 +146,8 @@
             </div>
         </form>
         <div class="social-login">
-            <a class="google" href="#">
-                <i class="fab fa-google">
-                </i>
+            <a class="google" th:href="@{/oauth2/authorization/google}">
+                <img src="/image/google.png" alt="Login with Google" style="width: 40px; height: 40px;"/>
             </a>
         </div>
     </div>

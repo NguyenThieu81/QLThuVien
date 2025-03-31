@@ -14,6 +14,55 @@
         flex-direction: column;
         min-height: 100vh; /* Đảm bảo chiều cao tối thiểu bằng chiều cao của cửa sổ trình duyệt */
     }
+        form {
+      position: relative; /* Để nút tìm kiếm có thể được định vị chính xác bên trong */
+    }
+
+    input[type="text"] {
+      width: 300px; /* Hoặc kích thước phù hợp với giao diện của bạn */
+    }
+
+    .search-button {
+        border: none; /* Không có viền */
+        cursor: pointer; /* Hiển thị con trỏ khi di chuột qua */
+    }
+
+
+
+    /* Giữ nguyên các thuộc tính vị trí của nút */
+    .search-button {
+        position: absolute; /* Để nút tìm kiếm nằm trong ô tìm kiếm */
+        right: 10px; /* Khoảng cách từ bên phải */
+        transform: translateY(5%); /* Căn giữa theo chiều dọc */
+    }
+
+}
+.notification-icon {
+    position: relative; /* Để định vị badge bên trong icon */
+    display: inline-block; /* Đảm bảo nó chỉ chiếm không gian cần thiết */
+    margin-right: 10px; /* Khoảng cách giữa icon và các phần tử khác */
+}
+
+.notification-icon .icon {
+    width: px; /* Kích thước của biểu tượng thông báo */
+    height: 24px; /* Kích thước của biểu tượng thông báo */
+}
+
+.notification-badge {
+    position: absolute; /* Để định vị badge bên trong icon */
+    top: -10px; /* Điều chỉnh vị trí theo chiều dọc */
+    right: -10px; /* Điều chỉnh vị trí theo chiều ngang */
+    background-color: red; /* Màu nền nổi bật */
+    color: white; /* Màu chữ trắng để dễ đọc */
+    border-radius: 50%; /* Tạo hình tròn */
+    padding: 2px 4px; /* Padding để tạo không gian xung quanh chữ */
+    font-size: 0.75rem; /* Kích thước chữ nhỏ hơn */
+    min-width: 20px; /* Đảm bảo có chiều rộng tối thiểu */
+    text-align: center; /* Căn giữa chữ */
+    font-weight: bold; /* Chữ đậm */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Đổ bóng nhẹ để tạo chiều sâu */
+}
+
   </style>
 </head>
 <body>
@@ -26,34 +75,79 @@
         </a>
         <ul class="flex space-x-4">
           <li><a href="/" class="text-white hover:bg-gray-700 px-3 py-2 rounded">Trang chủ</a></li>
-          <li><a href="#" class="text-white hover:bg-gray-700 px-3 py-2 rounded">Giới thiệu</a></li>
-          <li><a href="#" class="text-white hover:bg-gray-700 px-3 py-2 rounded">Liên hệ</a></li>
+          <li><a href="/about" class="text-white hover:bg-gray-700 px-3 py-2 rounded">Giới thiệu</a></li>
+          <li><a href="/appointments" class="text-white hover:bg-gray-700 px-3 py-2 rounded">Đặt lịch hẹn</a></li>
+          <li><a href="/history" class="text-white hover:bg-gray-700 px-3 py-2 rounded">Lịch sử trả sách</a></li>
         </ul>
       </div>
       <div class="flex items-center">
-        <form class="relative ml-4">
-          <input type="search" placeholder="Tìm kiếm" class="rounded-full pl-4 pr-10 py-2 focus:outline-none"/>
-          <button type="submit" class="absolute right-0 top-0 mt-2 mr-3 text-gray-500 hover:text-gray-700">
-            <i class="fas fa-search"></i>
-          </button>
-        </form>
         <div class="relative ml-4">
-          <a href="/borrow" class="text-white hover:bg-gray-700 px-3 py-2 rounded flex items-center">
+          <form th:action="@{/search}" method="get" class="flex items-center">
+            <input type="text" name="query" placeholder="Tìm kiếm theo tên sách, tác giả, thể loại"  class="rounded-full pl-4 pr-10 py-2 focus:outline-none"/>
+            <button type="submit" class="search-button">
+              <i class="fas fa-search"></i>
+            </button>
+          </form>
+        </div>
+        <div class="relative ml-4">
+          <a href="/bookshelf" class="text-white hover:bg-gray-700 px-3 py-2 rounded flex items-center">
             <img src="/image/bookshelf.png" alt="bookshelf" class="h-6 w-6"/>
-            <span class="ml-1 text-sm" th:text="${cartItemCount}">0</span> <!-- Số lượng sách mượn -->
           </a>
+        </div>
+        <div class="relative ml-4">
+          <div class="flex items-center cursor-pointer" id="notificationIcon">
+            <img src="/image/notification.png" alt="notification" class="h-6 w-6"/>
+            <span class="notification-badge" th:if="${notificationCount > 0}" th:text="${notificationCount}">0</span>
+            <span class="notification-badge" th:if="${notificationCount == 0}" style="display:none;"></span>
+          </div>
+
+          <div class="absolute right-0 mt-2 w-80 bg-white border rounded shadow-lg hidden" id="notificationDropdown">
+            <h2 class="font-bold p-2">Thông Báo</h2>
+            <form th:action="@{/notifications/mark-all-read}" method="post" style="display: inline;">
+            <span class="cursor-pointer text-blue-500 hover:underline px-2 py-1" style="padding: 8px; cursor: pointer;" onclick="this.closest('form').submit();">
+                Đánh dấu tất cả đã đọc
+            </span>
+            </form>
+            <div class="max-h-60 overflow-y-auto">
+              <ul>
+                <li th:each="notification : ${notifications}" class="p-2 hover:bg-gray-200">
+                  <a th:href="@{/notification/{id}(id=${notification.id})}" class="block">
+                    <div class="flex justify-between items-center">
+                      <div>
+                        <div th:text="${notification.message}"></div>
+                        <div th:if="${notification.type == 'APPOINTMENT_CONFIRMATION'}">
+                          <span>Ngày hẹn: </span>
+                          <span th:text="${notification.getFormattedCreatedAt()}"></span>
+                        </div>
+                      </div>
+                      <div th:if="${!notification.isRead}" class="text-red-500">Chưa đọc</div>
+                    </div>
+                    <div th:if="${notification.type == 'BOOK_BORROW'}" class="text-green-600">
+                      <span>📚 Sách đã mượn</span>
+                    </div>
+                    <div th:if="${notification.type == 'APPOINTMENT_CONFIRMATION'}" class="text-blue-600">
+                      <span>📅 Lịch hẹn đã xác nhận</span>
+                    </div>
+                    <div th:if="${notification.type == 'BOOK_RETURN'}" class="text-orange-600">
+                      <span>🔄 Sách đã trả</span>
+                    </div>
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </div>
         </div>
         <div class="ml-4 flex items-center relative">
           <span sec:authorize="isAuthenticated()" class="flex items-center">
             <img src="/image/user1.png" alt="User " class="h-8 w-8 rounded-full cursor-pointer" id="userImage"/>
             <span class="text-white ml-2" th:text="${#authentication.name}">Tên người dùng</span>
             <form th:action="@{/logout}" method="post" sec:authorize="isAuthenticated()" class="absolute top-full right-0 hidden mt-2" id="logoutForm">
-              <button type="submit" class="bg-gray-800 text-white border border-white px-2 py-1 rounded hover:bg-gray-700">
+              <button type="submit" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold px-2 py-1 rounded-full shadow-lg hover:from-blue-600 hover:to-purple-700 ml-4">
                 Đăng xuất
               </button>
             </form>
           </span>
-          <a href="/login" sec:authorize="!isAuthenticated()" class="text-white border border-white px-3 py-2 rounded hover:bg-gray-700 ml-4">
+          <a href="/login" sec:authorize="!isAuthenticated()" class="bg-blue-800 text-white border border-white px-2 py-1 rounded hover:bg-red-700">
             Đăng nhập
           </a>
         </div>
@@ -70,7 +164,7 @@
 
 <footer th:fragment="footer" class="bg-gray-800 text-white py-4">
   <div class="container mx-auto text-center">
-    <span>© 2024 Quản lý Thư Viện. Tất cả các quyền được bảo lưu.</span>
+    <span>© 2024 Quản lý Thư Viện.</span>
   </div>
 </footer>
 <script>
@@ -93,6 +187,25 @@
       logoutForm.classList.add('hidden');
     }
   });
+
+const notificationIcon = document.getElementById('notificationIcon');
+const notificationDropdown = document.getElementById('notificationDropdown');
+
+notificationIcon.addEventListener('click', function(event) {
+    event.stopPropagation(); // Ngăn chặn sự kiện click từ lan ra ngoài
+    notificationDropdown.classList.toggle('hidden'); // Chuyển đổi lớp 'hidden' để hiển thị hoặc ẩn dropdown
+});
+
+// Đóng dropdown khi nhấp bên ngoài
+document.addEventListener('click', function(event) {
+    if (!notificationIcon.contains(event.target) && !notificationDropdown.contains(event.target)) {
+        notificationDropdown.classList.add('hidden');
+    }
+});
+
+
+</script>
+
 </script>
 </body>
 </html>

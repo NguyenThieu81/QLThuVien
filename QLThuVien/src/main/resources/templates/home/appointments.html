@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Đặt Lịch Hẹn</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            margin: 0; /* Remove default margin */
+        }
+
+        .content {
+            flex-grow: 1;
+            max-width: 100%; /* Full width */
+            margin: 0; /* Remove margin */
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            display: flex; /* Use flexbox for layout */
+        }
+
+        .form-container {
+            flex: 1; /* Take up available space */
+            padding: 20px;
+        }
+
+        .selected-books {
+            flex: 1; /* Take up available space */
+            padding: 20px;
+            border-left: 1px solid #ccc; /* Add a border to separate */
+            max-width: 400px; /* Limit width */
+            overflow-y: auto; /* Allow scrolling */
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .form-group button {
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .form-group button:hover {
+            background-color: #0056b3;
+        }
+
+        .notification {
+            color: green;
+            margin-bottom: 20px;
+        }
+
+        .book-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .book-item {
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+
+        .book-item img {
+            width: 50px; /* Chiều rộng hình ảnh */
+            height: 75px; /* Chiều cao hình ảnh */
+            margin-right: 10px; /* Khoảng cách giữa hình ảnh và tên sách */
+        }
+
+        .book-item:hover {
+            background-color: #f0f0f0;
+        }
+
+        .selected {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .search-container {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .search-container input {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+
+        .selected-books table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .selected-books th, .selected-books td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        .selected-books th {
+            background-color: #f2f2f2;
+        }
+
+        .price-banner {
+            margin: 10px 0;
+            font-weight: bold;
+            color: #d9534f; /* Bootstrap danger color */
+        }
+
+        .discount {
+            color: #d9534f; /* Bootstrap danger color */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<header th:replace="layout :: header"></header>
+<div class="content">
+    <div class="form-container">
+        <div th:if="${message}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert" id="successMessage">
+            <strong class="font-bold">Thông báo!</strong>
+            <span class="block sm:inline" th:text="${message}"></span>
+        </div>
+        <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert" id="errorMessage">
+            <strong class="font-bold">Lỗi!</strong>
+            <span class="block sm:inline" th:text ="${error}"></span>
+        </div>
+        <h2>Đặt Lịch Hẹn</h2>
+        <div class="price-banner">Giá: 5000đ/1 cuốn sách/1 ngày.Nếu mượn hơn 7 ngày thì tính từ ngày thứ 8 thì 8000đ/1 cuốn sách/1 ngày(7 ngày trước vẫn 5000đ/1 cuốn sách/1 ngày) .Mượn 3 cuốn sách sẽ giảm 30% tổng tiền mượn!</div>
+        <form id="appointmentForm" th:action="@{/appointments/create}" method="post">
+            <div class="form-group">
+                <label for="borrowDate">Ngày Giờ Mượn</label>
+                <input type="datetime-local" id="borrowDate" name="borrowDate" required>
+            </div>
+            <div class="form-group">
+                <label for="returnDate">Ngày Giờ Trả</label>
+                <input type="datetime-local" id="returnDate" name="returnDate" required>
+            </div>
+            <div class="form-group">
+                <label>Chọn Sách (Tối đa 3 cuốn)</label>
+                <div class="search-container">
+                    <input type="text" id="searchBooks" placeholder="Tìm kiếm sách..." onkeyup="filterBooks()">
+                </div>
+                <div class="book-list" id="bookList">
+                    <div th:each="book : ${books}" class="book-item" th:data-id="${book.id}" onclick="toggleBookSelection(this)">
+                        <img th:src="@{${book.imagePath}}" alt="Hình ảnh sách">
+                        <span th:text="${book.title}">Tên sách</span>
+                    </div>
+                </div>
+                <input type="hidden" id="selectedBooks" name="bookIds" value="">
+            </div>
+            <div class="form-group">
+                <label for="notes">Ghi Chú</label>
+                <textarea id="notes" name="notes" rows="4" placeholder="Nhập ghi chú (nếu có)" maxlength="5000"></textarea>
+            </div>
+            <div class="form-group">
+                <button type="submit">Đặt Lịch Hẹn</button>
+            </div>
+        </form>
+    </div>
+    <div class="selected-books">
+        <h3> </h3>
+        <table>
+            <thead>
+            <tr>
+                <th>Tên Sách</th>
+                <th>Tổng Ngày Mượn</th>
+                <th>Tiền Mượn (VNĐ)</th>
+            </tr>
+            </thead>
+            <tbody id="selectedBooksTable">
+            <!-- Selected books will be dynamically added here -->
+            </tbody>
+        </table>
+        <div id="totalCost">Tổng Tiền: 0 VNĐ</div>
+    </div>
+</div>
+<footer th:replace="layout :: footer"></footer>
+<script>
+    const userImage = document.getElementById('userImage');
+    const logoutForm = document.getElementById('logoutForm');
+
+    userImage.addEventListener('click', function() {
+      if (logoutForm.classList.contains('hidden')) {
+        logoutForm.classList.remove('hidden');
+      } else {
+        logoutForm.classList.add('hidden');
+      }
+    });
+
+    document.addEventListener('click', function(event) {
+      if (!userImage.contains(event.target) && !logoutForm.contains(event.target)) {
+        logoutForm.classList.add('hidden');
+      }
+    });
+    const selectedBooks = new Set();
+  const bookPrices = 5000; // Price per day for the first 7 days
+  const increasedPrice = 8000; // Price per day after 7 days
+  const discountThreshold = 3; // Number of books for discount
+  const discountRate = 0.3; // 30% discount
+
+  function toggleBookSelection(element) {
+      const bookId = element.getAttribute('data-id');
+      const bookTitle = element.querySelector('span').textContent;
+      const selectedBooksTable = document.getElementById('selectedBooksTable');
+      let totalCost = 0;
+
+      console.log(`Toggling selection for book ID: ${bookId}, Title: ${bookTitle}`);
+
+      if (selectedBooks.has(bookId)) {
+          selectedBooks.delete(bookId);
+          element.classList.remove('selected');
+          console.log(`Removed book ID: ${bookId} from selection.`);
+          // Remove book from the table
+          const row = Array.from(selectedBooksTable.rows).find(r => r.dataset.id === bookId);
+          if (row) {
+              selectedBooksTable.removeChild(row);
+              console.log(`Removed book row for ID: ${bookId} from the table.`);
+          }
+      } else {
+          if (selectedBooks.size < 3) {
+              selectedBooks.add(bookId);
+              element.classList.add('selected');
+              console.log(`Added book ID: ${bookId} to selection.`);
+              // Add book to the table
+              const row = document.createElement('tr');
+              row.dataset.id = bookId;
+              row.innerHTML = `<td>${bookTitle}</td><td class="total-days">0</td><td class="book-cost">0 VNĐ</td>`;
+              selectedBooksTable.appendChild(row);
+              console.log(`Added book row for ID: ${bookId} to the table.`);
+          } else {
+              alert('Bạn chỉ có thể chọn tối đa 3 cuốn sách.');
+              console.log(`Attempted to add book ID: ${bookId} but selection limit reached.`);
+          }
+      }
+
+      // Calculate total cost
+      const borrowDate = new Date(document.getElementById('borrowDate').value);
+      const returnDate = new Date(document.getElementById('returnDate').value);
+      if (borrowDate && returnDate && returnDate > borrowDate) {
+          const days = Math.ceil((returnDate - borrowDate) / (1000 * 60 * 60 * 24));
+          const costPerBook = days > 7 ? (7 * bookPrices + (days - 7) * increasedPrice) : (days * bookPrices);
+
+          console.log(`Calculating cost: Days = ${days}, Cost per book = ${costPerBook} VNĐ`);
+
+          // Update costs in the table
+          selectedBooksTable.querySelectorAll('.book-cost').forEach(td => {
+              td.textContent = `${costPerBook} VNĐ`;
+          });
+
+          // Update total days borrowed in the table
+          selectedBooksTable.querySelectorAll('.total-days').forEach(td => {
+              td.textContent = `${days}`;
+          });
+
+          // Calculate total cost for all selected books
+          totalCost = Array.from(selectedBooks).length * costPerBook;
+
+          // Apply discount if applicable
+          if (selectedBooks.size === discountThreshold) {
+              totalCost *= (1 - discountRate); // Apply discount
+              document.getElementById('totalCost').innerHTML = `Tổng Tiền: ${totalCost} VNĐ <span class="discount">(Đã giảm 30%)</span>`;
+              console.log(`Discount applied. Total cost after discount: ${totalCost} VNĐ`);
+          } else {
+              document.getElementById('totalCost').textContent = `Tổng Tiền: ${totalCost} VNĐ`;
+              console.log(`Total cost: ${totalCost} VNĐ`);
+          }
+      }
+      document.getElementById('selectedBooks').value = Array.from(selectedBooks).join(',');
+      console.log(`Selected books IDs: ${Array.from(selectedBooks).join(', ')}`);
+  }
+
+  function filterBooks() {
+      const searchInput = document.getElementById('searchBooks').value.toLowerCase();
+      const bookItems = document.querySelectorAll('.book-item');
+      bookItems.forEach(item => {
+          const bookTitle = item.querySelector('span').textContent.toLowerCase();
+          if (bookTitle.includes(searchInput)) {
+              item.style.display = '';
+          } else {
+   item.style.display = 'none';
+          }
+      });
+  }
+
+  function hideMessage(messageId) {
+      const messageElement = document.getElementById(messageId);
+      if (messageElement) {
+          setTimeout(() => {
+              messageElement.style.display = 'none';
+          }, 6000); // Thời gian hiển thị (6000ms = 6 giây)
+      }
+  }
+
+  // Gọi hàm để ẩn thông báo
+  hideMessage('successMessage');
+  hideMessage('errorMessage');
+    const notificationIcon = document.getElementById('notificationIcon');
+const notificationDropdown = document.getElementById('notificationDropdown');
+
+notificationIcon.addEventListener('click', function(event) {
+    event.stopPropagation(); // Prevent the click from bubbling up
+    notificationDropdown.classList.toggle('hidden'); // Toggle the dropdown
+});
+
+// Close the dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    if (!notificationIcon.contains(event.target) && !notificationDropdown.contains(event.target)) {
+        notificationDropdown.classList.add('hidden');
+    }
+});
+
+</script>
+</body>
+</html>

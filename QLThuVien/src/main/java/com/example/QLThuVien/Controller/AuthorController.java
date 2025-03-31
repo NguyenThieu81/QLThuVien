@@ -1,7 +1,10 @@
 package com.example.QLThuVien.Controller;
 
+import com.example.QLThuVien.entity.AdminNotification;
 import com.example.QLThuVien.entity.Author;
+import com.example.QLThuVien.services.AdminNotificationService;
 import com.example.QLThuVien.services.AuthorService;
+import com.example.QLThuVien.services.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -23,10 +26,14 @@ public class AuthorController {
 
     @Autowired
     private AuthorService authorService;
-
+    @Autowired private AdminNotificationService adminNotificationService;
     @GetMapping
     public String showAllAuthors(Model model) {
         List<Author> authors = authorService.getAllAuthors();
+        List<AdminNotification> adminNotifications = adminNotificationService.getAllAdminNotifications();
+        long unreadAdminNotificationCount = adminNotificationService.countUnreadAdminNotifications();
+        model.addAttribute("adminNotifications", adminNotifications); // Đảm bảo tên này khớp với tên trong HTML
+        model.addAttribute("unreadAdminNotificationCount", unreadAdminNotificationCount); // Thêm biến này vào mô hình
         model.addAttribute("authors", authors);
         return "admin/authors";
     }
@@ -34,6 +41,10 @@ public class AuthorController {
     @GetMapping("/add")
     public String showAddForm(Model model) {
         model.addAttribute("author", new Author());
+        List<AdminNotification> adminNotifications = adminNotificationService.getAllAdminNotifications();
+        long unreadAdminNotificationCount = adminNotificationService.countUnreadAdminNotifications();
+        model.addAttribute("adminNotifications", adminNotifications); // Đảm bảo tên này khớp với tên trong HTML // Đảm bảo tên này khớp với tên trong HTML
+        model.addAttribute("unreadAdminNotificationCount", unreadAdminNotificationCount); // Thêm biến này vào mô hình
         return "admin/author-add";
     }
 
@@ -50,6 +61,10 @@ public class AuthorController {
 
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {
+        List<AdminNotification> adminNotifications = adminNotificationService.getAllAdminNotifications();
+        long unreadAdminNotificationCount = adminNotificationService.countUnreadAdminNotifications();
+        model.addAttribute("adminNotifications", adminNotifications); // Đảm bảo tên này khớp với tên trong HTML// Đảm bảo tên này khớp với tên trong HTML
+        model.addAttribute("unreadAdminNotificationCount", unreadAdminNotificationCount); // Thêm biến này vào mô hình
         Author author = authorService.getById(id);
         model.addAttribute("author", author);
         return "admin/author-edit";

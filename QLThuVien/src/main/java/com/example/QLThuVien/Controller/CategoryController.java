@@ -1,7 +1,10 @@
 package com.example.QLThuVien.Controller;
 
+import com.example.QLThuVien.entity.AdminNotification;
 import com.example.QLThuVien.entity.Category;
+import com.example.QLThuVien.services.AdminNotificationService;
 import com.example.QLThuVien.services.CategoryService;
+import com.example.QLThuVien.services.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
@@ -24,8 +27,13 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
+    @Autowired private AdminNotificationService adminNotificationService;
     @GetMapping
     public String showAllCategories(Model model) {
+        List<AdminNotification> adminNotifications = adminNotificationService.getAllAdminNotifications();
+        long unreadAdminNotificationCount = adminNotificationService.countUnreadAdminNotifications();
+        model.addAttribute("adminNotifications", adminNotifications); // Đảm bảo tên này khớp với tên trong HTML // Đảm bảo tên này khớp với tên trong HTML
+        model.addAttribute("unreadAdminNotificationCount", unreadAdminNotificationCount); // Thêm biến này vào mô hình
         List<Category> categories = categoryService.getAllCategories();
         model.addAttribute("categories", categories);
         return "admin/categories";
@@ -33,6 +41,10 @@ public class CategoryController {
 
     @GetMapping("/add")
     public String showAddForm(Model model) {
+        List<AdminNotification> adminNotifications = adminNotificationService.getAllAdminNotifications();
+        long unreadAdminNotificationCount = adminNotificationService.countUnreadAdminNotifications();
+        model.addAttribute("adminNotifications", adminNotifications); // Đảm bảo tên này khớp với tên trong HTML// Đảm bảo tên này khớp với tên trong HTML
+        model.addAttribute("unreadAdminNotificationCount", unreadAdminNotificationCount); // Thêm biến này vào mô hình
         model.addAttribute("category", new Category());
         return "admin/category-add";
     }
@@ -51,6 +63,11 @@ public class CategoryController {
 
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Long id, Model model) {
+        List<AdminNotification> adminNotifications = adminNotificationService.getAllAdminNotifications();
+        long unreadAdminNotificationCount = adminNotificationService.countUnreadAdminNotifications();
+        model.addAttribute("adminNotifications", adminNotifications); // Đảm bảo tên này khớp với tên trong HTML
+        model.addAttribute("notifications", adminNotifications); // Đảm bảo tên này khớp với tên trong HTML
+        model.addAttribute("unreadAdminNotificationCount", unreadAdminNotificationCount); // Thêm biến này vào mô hình
         Category category = categoryService.getById(id);
         model.addAttribute("category", category);
         return "admin/category-edit";

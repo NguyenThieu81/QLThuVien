@@ -9,6 +9,7 @@
         flex-direction: column;
         min-height: 100vh;
     }
+
     .content {
         flex-grow: 1;
     }
@@ -25,26 +26,56 @@
         width: 100%; /* Hình ảnh chiếm toàn bộ chiều rộng khung */
         height: auto; /* Để chiều cao tự động */
     }
+    .pagination {
+    display: flex;
+    justify-content: center; /* Căn giữa */
+    align-items: center; /* Căn giữa theo chiều dọc */
+    margin: 20px 0; /* Khoảng cách trên và dưới */
+}
+
+.arrow {
+    font-size: 20px; /* Kích thước mũi tên */
+    text-decoration: none; /* Bỏ gạch chân */
+    margin: 0 10px; /* Khoảng cách giữa các mũi tên và số trang */
+}
+    .page-buttons a {
+    margin: 0 5px; /* Khoảng cách giữa các nút */
+    padding: 5px 10px; /* Khoảng cách bên trong nút */
+    border: 1px solid #ccc; /* Viền cho nút */
+    border-radius: 5px; /* Bo góc cho nút */
+    text-decoration: none; /* Bỏ gạch chân */
+    color: #333; /* Màu chữ */
+}
+
+.page-buttons a.current-page {
+    background-color: #007bff; /* Màu nền cho nút hiện tại */
+    color: white; /* Màu chữ cho nút hiện tại */
+}
   </style>
 </head>
 <body>
 <header th:replace="layout :: header"></header>
 <div class="content">
-  <div id="notification" class="notification" th:if="${param.message}">
-    <p th:text="${param.message}"></p>
+  <div th:if="${message}" class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert" id="successMessage">
+    <strong class="font-bold">Thông báo!</strong>
+    <span class="block sm:inline" th:text="${message}"></span>
+  </div>
+  <div th:if="${error}" class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert" id="errorMessage">
+    <strong class="font-bold">Lỗi!</strong>
+    <span class="block sm:inline" th:text="${error}"></span>
   </div>
   <div class="flex justify-between items-center mb-4">
     <div class="flex space-x-4">
       <div class="relative">
-        <select id="categorySelect" class="border rounded-full py-2 px-4">
-          <option value="">Tất cả thể loại</option>
-          <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
+        <select id="authorSelect" class="border rounded-full py-2 px-4" onchange="filterByAuthor(this.value)">
+          <option value="">Tất cả tác giả</option>
+          <option th:each="author : ${authors}" th:value="${author.id}" th:text="${author.name}"></option>
         </select>
       </div>
       <div class="relative">
-        <select id="authorSelect" class="border rounded-full py-2 px-4">
-          <option value="">Tất cả tác giả</option>
-          <option th:each="author : ${authors}" th:value="${author.id}" th:text="${author.name}"></option>
+        <select id="categorySelect" class="border rounded-full py-2 px-4" onchange="filterByCategory(this.value)">
+          <option value="">Tất cả thể loại</option>
+          <option th:each="category : ${categories}" th:value="${category.id}" th:text="${category.name}"></option>
         </select>
       </div>
     </div>
@@ -61,6 +92,24 @@
         </div>
       </a>
     </div>
+  </div>
+  <div class="pagination flex justify-center my-4">
+    <a th:if="${currentPage > 0}" th:href="@{/index(page=${currentPage - 1})}" class="arrow">
+      &#8592; <!-- Mũi tên trái -->
+    </a>
+
+    <div class="page-buttons">
+        <span th:each="page : ${#numbers.sequence(0, totalPages - 1)}">
+            <a th:href="@{/index(page=${page})}"
+               th:class="${page == currentPage} ? 'current-page' : ''">
+                <span th:text="${page + 1}">1</span>
+            </a>
+        </span>
+    </div>
+
+    <a th:if="${currentPage < totalPages - 1}" th:href="@{/index(page=${currentPage + 1})}" class="arrow">
+      &#8594; <!-- Mũi tên phải -->
+    </a>
   </div>
 </div>
 <footer th:replace="layout :: footer"></footer>
@@ -84,14 +133,53 @@
       logoutForm.classList.add('hidden');
     }
   });
-  // Hiển thị thông báo nếu có
-    const notification = document.getElementById('notification');
-    if (notification) {
-        notification.style.display = 'block'; // Hiển thị thông báo
-        setTimeout(() => {
-            notification.style.display = 'none'; // Ẩn thông báo sau 3 giây
-        }, 5000);
+ // Hàm để tự động ẩn thông báo sau một khoảng thời gian
+    function hideMessage(messageId) {
+        const messageElement = document.getElementById(messageId);
+        if (messageElement) {
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 6000); // Thời gian hiển thị (3000ms = 3 giây)
+        }
     }
+
+    // Gọi hàm để ẩn thông báo
+    hideMessage('successMessage');
+    hideMessage('errorMessage');
+
+  function filterByAuthor(authorId) {
+    if (authorId) {
+        window.location.href = '/books/author/' + authorId;
+    } else {
+        window.location.href = '/index'; // Trở về trang chính nếu không chọn tác giả
+    }
+}
+
+function filterByCategory(categoryId) {
+    if (categoryId) {
+        window.location.href = '/books/category/' + categoryId;
+    } else {
+        window.location.href = '/index'; // Trở về trang chính nếu không chọn thể loại
+    }
+}
+
+const notificationIcon = document.getElementById('notificationIcon');
+const notificationDropdown = document.getElementById('notificationDropdown');
+
+notificationIcon.addEventListener('click', function(event) {
+    event.stopPropagation(); // Prevent the click from bubbling up
+    notificationDropdown.classList.toggle('hidden'); // Toggle the dropdown
+});
+
+// Close the dropdown when clicking outside
+document.addEventListener('click', function(event) {
+    if (!notificationIcon.contains(event.target) && !notificationDropdown.contains(event.target)) {
+        notificationDropdown.classList.add('hidden');
+    }
+});
+
+
+
 </script>
 </body>
 </html>

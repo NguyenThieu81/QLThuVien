@@ -1,10 +1,9 @@
 package com.example.QLThuVien.services;
 
-
-import com.example.QLThuVien.Role;
-import com.example.QLThuVien.entity.BorrowRecord;
+import jakarta.validation.Validator;
+import com.example.QLThuVien.UserRole;
 import com.example.QLThuVien.entity.User;
-import com.example.QLThuVien.repository.BorrowRecordRepository;
+import com.example.QLThuVien.entity.Role;
 import com.example.QLThuVien.repository.IRoleRepository;
 import com.example.QLThuVien.repository.IUserRepository;
 import jakarta.validation.constraints.NotNull;
@@ -19,8 +18,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+
 @Service
 @Slf4j
 @Transactional
@@ -30,7 +30,7 @@ public class UserService implements UserDetailsService {
     @Autowired
     private IRoleRepository roleRepository;
     @Autowired
-    private BorrowRecordRepository borrowRecordRepository;
+    private Validator validator;
     // Lưu người dùng mới vào cơ sở dữ liệu sau khi mã hóa mật khẩu.
     public void save(@NotNull User user) {
         user.setPassword(new BCryptPasswordEncoder().encode(user.getPassword()));
@@ -41,22 +41,27 @@ public class UserService implements UserDetailsService {
     public void setDefaultRole(String username) {
         userRepository.findByUsername(username).ifPresentOrElse(
                 user -> {
-
-                    user.getRoles().add(roleRepository.findRoleById(Role.USER.value));
-                    userRepository.save(user);
+                    // Tìm vai trò USER trong cơ sở dữ liệu bằng tên
+                    Role role = roleRepository.findByName(UserRole.USER.getName()); // Change here
+                    if (role != null) {
+                        user.getRoles().add(role);
+                        userRepository.save(user);
+                        log.info("Gán vai trò USER cho người dùng: {}", user.getUsername());
+                    } else {
+                        log.error("Không thể gán vai trò USER vì nó không tồn tại.");
+                    }
                 },
-                () -> { throw new UsernameNotFoundException("User not found"); }
+                () -> { throw new UsernameNotFoundException("User  not found"); }
         );
     }
     // Tải thông tin chi tiết người dùng để xác thực.
     @Override
-    public UserDetails loadUserByUsername(String username) throws
-            UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         var user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         return org.springframework.security.core.userdetails.User
-                .withUsername(user.getUsername())
+                .withUsername(user.getUsername()) // Đảm bảo rằng thuộc tính "username" chứa tên người dùng
                 .password(user.getPassword())
                 .authorities(user.getAuthorities())
                 .accountExpired(!user.isAccountNonExpired())
@@ -65,10 +70,14 @@ public class UserService implements UserDetailsService {
                 .disabled(!user.isEnabled())
                 .build();
     }
+
     // Tìm kiếm người dùng dựa trên tên đăng nhập.
     public Optional<User> findByUsername(String username) throws
             UsernameNotFoundException {
         return userRepository.findByUsername(username);
+    }
+    public Optional<User> findById(Long id) {
+        return userRepository.findById(id); // Giả sử bạn đã định nghĩa phương thức này trong IUserRepository
     }
     // Xóa người dùng dựa trên username
     public void deleteUserByUsername(String username) {
@@ -91,7 +100,23 @@ public class UserService implements UserDetailsService {
         return null;
     }
 
-    public List<BorrowRecord> getAllBorrowRecords() {
-        return borrowRecordRepository.findAll(); // Giả sử bạn có repository để truy xuất bản ghi mượn
+
+    public User saveOrUpdateUserFromGoogle(String username, String email) {
+        Optional<User> existingUser = userRepository.findByUsername(username);
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            user.setEmail(email);
+            return userRepository.save(user);
+        } else {
+            User newUser = new User();
+            newUser.setUsername(username); // Sử dụng thuộc tính "name" cho username
+            newUser.setEmail(email);
+            newUser.setFromGoogle(true); // Đặt cờ từ Google
+            newUser.setRoles(Set.of(roleRepository.findByName(UserRole.USER.getName())));
+            return userRepository.save(newUser);
+        }
     }
+
+
+
 }

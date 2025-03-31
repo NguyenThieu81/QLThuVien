@@ -1,15 +1,11 @@
 package com.example.QLThuVien.config;
 import com.example.QLThuVien.services.UserService;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,10 +17,12 @@ import org.springframework.security.web.access.AccessDeniedHandler;
 public class SecurityConfig {
     private final UserService userService;
     private final CustomLoginSuccessHandler customLoginSuccessHandler;
+
     @Bean
     public UserDetailsService userDetailsService() {
         return userService; // Trả về dịch vụ UserService trực tiếp.
     }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(); // Sử dụng BCrypt để mã hóa mật khẩu.
@@ -45,12 +43,16 @@ public class SecurityConfig {
     }
 
     @Bean
+    public CustomOAuth2UserService customOAuth2UserService() {
+        return new CustomOAuth2UserService(userService);
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/css/**", "/js/**", "/", "/oauth/**", "/register", "/error","/image/**").permitAll() // Không yêu cầu xác thực.
-                        .requestMatchers("/admin/**","/admin/book/**","/admin/category/**","/admin/author/**","/admin/borrow-management").hasRole("ADMIN")
-
+                        .requestMatchers("/admin/**","/admin/book/**","/admin/category/**","/admin/author/**").hasRole("ADMIN")
                         .requestMatchers("/api/**").permitAll() // API mở cho mọi người.
                         .anyRequest().authenticated() // Yêu cầu xác thực cho các yêu cầu khác.
                 )
@@ -75,13 +77,20 @@ public class SecurityConfig {
                         .tokenValiditySeconds(24 * 60 * 60) // Thời gian nhớ đăng nhập là 24 giờ.
                         .userDetailsService(userDetailsService())
                 )
-                .sessionManagement(sessionManagement -> sessionManagement
-                        .maximumSessions(1) // Chỉ cho phép 1 phiên đăng nhập.
-                        .expiredUrl("/login") // Chuyển hướng khi phiên hết hạn.
-                )
 
+                .sessionManagement(sessionManagement -> sessionManagement
+                        .maximumSessions(-1 ) // Giới hạn số phiên đăng nhập.
+                        .expiredUrl("/login") // Trang khi phiên hết hạn.
+                        .maxSessionsPreventsLogin(false) // Thêm dòng này
+                )
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/login") // Chỉ định trang đăng nhập cho OAuth2
+                        .defaultSuccessUrl("/") // Chuyển hướng sau khi đăng nhập thành công
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService())
+                        )
+                )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .accessDeniedPage("/403") // Trang xử lý truy cập bị từ chối.
                         .accessDeniedHandler(customAccessDeniedHandler()) // Xử lý ngoại lệ truy cập bị từ chối.
                 );
 

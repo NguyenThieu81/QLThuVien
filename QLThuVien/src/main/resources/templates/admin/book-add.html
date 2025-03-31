@@ -87,6 +87,23 @@
     // Update the date and time every second
     setInterval(updateDateTime, 1000);
     updateDateTime();
+
+    // Lấy các phần tử cần thiết
+const adminNotificationIcon = document.getElementById('adminNotificationIcon');
+const adminNotificationDropdown = document.getElementById('adminNotificationDropdown');
+
+// Hiển thị hoặc ẩn dropdown khi nhấp vào biểu tượng thông báo
+adminNotificationIcon.addEventListener('click', function(event) {
+    event.stopPropagation(); // Ngăn chặn sự kiện click từ lan ra ngoài
+    adminNotificationDropdown.style.display = adminNotificationDropdown.style.display === 'block' ? 'none' : 'block'; // Chuyển đổi hiển thị
+});
+
+// Đóng dropdown khi nhấp bên ngoài
+document.addEventListener('click', function(event) {
+    if (!adminNotificationIcon.contains(event.target) && !adminNotificationDropdown.contains(event.target)) {
+        adminNotificationDropdown.style.display = 'none'; // Ẩn dropdown
+    }
+});
 </script>
 
 </body>
